@@ -1,0 +1,14 @@
+// ✅ SKY BAZAAR - Asal Firebase Config
+const firebaseConfig = {
+  apiKey: "YAHAN APNI ASLI apiKey PASTE KARO",
+  authDomain: "YAHAN APNA ASLI authDomain PASTE KARO",
+  projectId: "YAHAN APNA ASLI projectId PASTE KARO",
+  storageBucket: "YAHAN APNA ASLI storageBucket PASTE KARO",
+  messagingSenderId: "YAHAN APNA ASLI messagingSenderId PASTE KARO",
+  appId: "YAHAN APNA ASLI appId PASTE KARO"
+};
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.firestore();
+console.log("✅ Firebase Connected - SKY SHOPPING");
