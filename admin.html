@@ -19,7 +19,7 @@
 <div class="sec">
 <div id="loginBox" class="form-box"><h2>🔐 Admin Login</h2><p style="font-size:13px;color:#666">Sirf Admin ke liye. Password galat hoga to andar nahi jaoge.</p>
 <form id="loginForm"><input id="passInput" type="password" placeholder="Admin Password likho" required><button class="btn btn-gold" style="width:100%">Admin Kholo →</button><p id="loginMsg"></p></form>
-<p style="font-size:12px;color:#888">Password bhool gaye? firebase-config.js me nahi, apne paas likh ke rakho.</p></div>
+<p style="font-size:12px;color:#888">Password: sky123</p></div>
 
 <div id="dashBox" style="display:none">
 <div style="display:flex;justify-content:space-between;align-items:center"><h2>👑 Admin Dashboard - SKY SHOPPING</h2><button class="btn" onclick="adminLogout()" style="background:#c00;color:#fff">Logout</button></div>
@@ -134,42 +134,24 @@ function render(){
 
 async function loadAll(){
   document.getElementById('content').innerHTML='Loading... Firebase se data aa raha hai...';
-  try{
-    let oSnap = await db.collection('sky_orders').orderBy('createdAt','desc').get();
-    // ✅ FIX: Asli Order ID mat khatam karo - orderId me rakho, docId alag rakho
-    allOrders=[]; oSnap.forEach(d=>{ let o=d.data(); o.docId=d.id; o.orderId=o.id; allOrders.push(o); });
-
-    let pSnap = await db.collection('sky_products').orderBy('createdAt','desc').get();
-    allProducts=[]; pSnap.forEach(d=>{ let p=d.data(); p.docId=d.id; allProducts.push(p); });
-
-    let rSnap = await db.collection('sky_resellers').get();
-    allResellers=[]; rSnap.forEach(d=>{ let r=d.data(); r.docId=d.id; allResellers.push(r); });
-
-    let sSnap = await db.collection('sky_suppliers').get();
-    allSuppliers=[]; sSnap.forEach(d=>{ let s=d.data(); s.docId=d.id; allSuppliers.push(s); });
-
-    let wSnap = await db.collection('sky_withdraw').orderBy('createdAt','desc').get();
-    allWithdraw=[]; wSnap.forEach(d=>{ let w=d.data(); w.docId=d.id; allWithdraw.push(w); });
-
-    let retSnap = await db.collection('sky_returns').orderBy('createdAt','desc').get();
-    allReturns=[]; retSnap.forEach(d=>{ let r=d.data(); r.docId=d.id; allReturns.push(r); });
-    // Agar sky_returns khaali hai to Orders se Return Request wale bhi dikhao
-    if(allReturns.length==0){
-      allReturns = allOrders.filter(o=>o.status=='Return Request'||o.status=='Returned').map(o=>({docId:o.docId, orderId:o.orderId, product:o.product, price:o.sellPrice||o.price||0, phone:o.returnPhone||o.phone, reason:o.returnReason||'', status:o.status}));
-    }
-
-    document.getElementById('cOrders').innerText = allOrders.length;
-    document.getElementById('cPending').innerText = allProducts.filter(p=>p.status=='Pending'||!p.status).length;
-    document.getElementById('cApproved').innerText = allProducts.filter(p=>p.status=='Approved').length;
-    document.getElementById('cWithdraw').innerText = allWithdraw.filter(w=>w.status=='Pending').length;
-    document.getElementById('cReturns').innerText = allReturns.filter(r=>r.status=='Return Request').length;
-    let totalProfit = allOrders.filter(o=>o.status=='Delivered').reduce((s,o)=>s+Number(o.profit||o.resellerProfit||0),0);
-    document.getElementById('cProfit').innerText = 'Rs. ' + totalProfit;
-    render();
-  }catch(e){
-    document.getElementById('content').innerHTML='❌ <b>Load nahi hua - Firebase check karo</b><br><br>1. Kya <b>firebase-config.js</b> me apni asli API Key hai?<br>2. Kya Firestore <b>Rules</b> me <b>allow read, write: if true</b> hai?<br>3. Console me F12 dabao, error dekho.';
-    console.log(e);
+  allOrders=[]; allProducts=[]; allResellers=[]; allSuppliers=[]; allWithdraw=[]; allReturns=[];
+  try{ let s=await db.collection('sky_orders').orderBy('createdAt','desc').get(); s.forEach(d=>{let o=d.data(); o.docId=d.id; o.orderId=o.id; allOrders.push(o);}); }catch(e){ console.log('orders fail', e.message); }
+  try{ let s=await db.collection('sky_products').orderBy('createdAt','desc').get(); s.forEach(d=>{let p=d.data(); p.docId=d.id; allProducts.push(p);}); console.log('PRODUCTS MILE:', allProducts.length); }catch(e){ console.log('products fail', e.message); alert('Products load error: '+e.message); }
+  try{ let s=await db.collection('sky_resellers').get(); s.forEach(d=>{let r=d.data(); r.docId=d.id; allResellers.push(r);}); }catch(e){}
+  try{ let s=await db.collection('sky_suppliers').get(); s.forEach(d=>{let s2=d.data(); s2.docId=d.id; allSuppliers.push(s2);}); }catch(e){}
+  try{ let s=await db.collection('sky_withdraw').orderBy('createdAt','desc').get(); s.forEach(d=>{let w=d.data(); w.docId=d.id; allWithdraw.push(w);}); }catch(e){}
+  try{ let s=await db.collection('sky_returns').orderBy('createdAt','desc').get(); s.forEach(d=>{let r=d.data(); r.docId=d.id; allReturns.push(r);}); }catch(e){}
+  if(allReturns.length==0){
+    allReturns = allOrders.filter(o=>o.status=='Return Request'||o.status=='Returned').map(o=>({docId:o.docId, orderId:o.orderId, product:o.product, price:o.sellPrice||o.price||0, phone:o.returnPhone||o.phone, reason:o.returnReason||'', status:o.status}));
   }
+  document.getElementById('cOrders').innerText = allOrders.length;
+  document.getElementById('cPending').innerText = allProducts.filter(p=>p.status=='Pending'||!p.status).length;
+  document.getElementById('cApproved').innerText = allProducts.filter(p=>p.status=='Approved').length;
+  document.getElementById('cWithdraw').innerText = allWithdraw.filter(w=>w.status=='Pending').length;
+  document.getElementById('cReturns').innerText = allReturns.filter(r=>r.status=='Return Request').length;
+  let totalProfit = allOrders.filter(o=>o.status=='Delivered').reduce((s,o)=>s+Number(o.profit||o.resellerProfit||0),0);
+  document.getElementById('cProfit').innerText = 'Rs. ' + totalProfit;
+  render();
 }
 
 async function changeStatus(docId, status){
@@ -178,7 +160,6 @@ async function changeStatus(docId, status){
   loadAll();
 }
 async function approveProduct(docId){
-  // ✅ FIX: Approve ke saath price bhi set karo taake Products me Rs. undefined na aaye
   let p = allProducts.find(x=>x.docId==docId);
   let price = p ? (p.price||p.supplierPrice||0) : 0;
   await db.collection('sky_products').doc(docId).update({status:'Approved', price:price, supplierPrice:price});
@@ -196,9 +177,7 @@ async function changeWithdraw(docId, status){
   loadAll();
 }
 async function changeReturn(docId, status){
-  // Agar sky_returns se hai to wahan update karo, warna order me
   try{ await db.collection('sky_returns').doc(docId).update({status:status}); }catch(e){}
-  // Order ka status bhi badlo
   let r = allReturns.find(x=>x.docId==docId);
   if(r && r.orderId){
     try{
