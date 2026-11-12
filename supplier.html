@@ -1,0 +1,175 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Supplier - SKY SHOPPING</title><link rel="stylesheet" href="style9.css"><link rel="stylesheet" href="css.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<style>
+.info-box{background:#e8f5e9;border:1px solid #a5d6a7;padding:14px;border-radius:14px;margin:12px 0;font-size:13px;line-height:1.6}
+.info-box b{color:#0a7a42}
+.upload-box{border:2px dashed #0a1a3d;border-radius:14px;padding:14px;text-align:center;background:#f0f4ff;margin-bottom:10px}
+.upload-box img{max-width:100%;max-height:180px;border-radius:10px;margin-top:10px;display:none}
+.or-line{text-align:center;color:#999;font-size:12px;margin:8px 0}
+.calc-box{background:#fff8e1;padding:12px;border-radius:12px;font-size:13px;margin:10px 0}
+</style>
+</head>
+<body><header><div class="top"><div class="logo"></div><h1>SKY <span>SHOPPING</span></h1></div><nav><a href="index.html">Home</a><a href="products.html">Products</a><a href="supplier.html" class="active">Supplier</a><a href="supplier-dashboard.html">My Dashboard</a><a href="Account.html">My Account</a><a href="admin.html">Admin</a></nav></header>
+
+<div class="sec">
+<div class="form-box"><h2>📦 Supplier - Product Add Karo</h2>
+<p style="font-size:13px;color:#666">Sirf apna rate batao. Reseller apna profit khud lagayega. Sky per order Rs. 100 lega. Parcel SKY SHOPPING ke naam se jayega.</p>
+
+<div class="info-box">
+<b>👋 Supplier, Pehle Ye Parh Lo - Sab Hisab Saaf:</b><br>
+1. ✅ <b>Paisa Kab Milega?</b> Order Delivered hone ke <b>3 din baad</b> aapke JazzCash / EasyPaisa par.<br>
+2. ✅ <b>Sky Fee Kitni?</b> Har order par sirf <b>Rs. 100</b> katega. Baaki poora paisa aapka.<br>
+3. ✅ <b>Parcel Kaun Bhejega?</b> Parcel <b>SKY SHOPPING</b> ke naam se jayega, aapka naam nahi aayega.<br>
+4. ✅ <b>Return Ka Kya Hoga?</b> Agar customer return karega to paisa aapko <b>nahi</b> milega, product wapis aa jayega.<br>
+5. ✅ <b>Product Kab Live Hoga?</b> Aap product bhejo ge, Admin check karke <b>Approve</b> karega, phir Reseller ko dikhega.<br>
+6. ✅ <b>Rate Kya Rakhu?</b> Wahi rate rakho jo aap dukaan par dete ho. Zyada rate rakho ge to order nahi aayega.
+</div>
+
+<form id="supplierForm">
+<input name="productName" placeholder="Product Naam - Ex: Nike Shoe" required>
+
+<div class="upload-box">
+<b>📸 Product Ki Pic</b><br><span style="font-size:12px;color:#666">Gallery se pic chuno YA neeche link paste karo</span><br><br>
+<input type="file" id="picFile" accept="image/*" onchange="previewPic(this)" style="width:100%">
+<img id="picPreview" src="">
+<p id="picStatus" style="font-size:12px;color:green;margin:6px 0 0"></p>
+</div>
+<div class="or-line">— YA —</div>
+<input name="image" id="imageLink" placeholder="Image Link Paste Karo - Agar link hai to">
+
+<label style="font-weight:700;font-size:14px">Tumhara Rate (Tumhe Kitna Chahiye?)</label>
+<input name="supplierPrice" id="rateInput" type="number" placeholder="Ex: 1200" required oninput="calcSupplier()">
+
+<input name="shopName" placeholder="Shop Ka Naam - Ex: Ahmed Shoes" required>
+<input name="ownerName" placeholder="Apna Naam" required>
+<input name="whatsapp" placeholder="WhatsApp Number - 03xx..." required>
+<input name="city" placeholder="City - Ex: Lahore">
+<input name="stock" type="number" placeholder="Stock - Kitne Piece Hain? Ex: 50" required>
+<textarea name="desc" placeholder="Size, Color, Quality - Ex: Size 40-44, Black/White"></textarea>
+<label style="font-weight:700;font-size:14px">Product Ki Category Chuno (A to Z)</label>
+<select name="category" id="catSelect" onchange="checkOtherCat()" required>
+<option value="">-- Category Chuno --</option>
+<option>Abaya / Hijab</option>
+<option>Accessories</option>
+<option>Artificial Jewellery</option>
+<option>Bags / Handbags</option>
+<option>Beauty / Makeup</option>
+<option>Bedsheets / Home</option>
+<option>Books / Stationery</option>
+<option>Clothes - Boys</option>
+<option>Clothes - Girls</option>
+<option>Clothes - Kids / Bachon Ke Kapre</option>
+<option>Clothes - Ladies / Khawateen</option>
+<option>Clothes - Men / Mardana</option>
+<option>Cosmetics / Skin Care</option>
+<option>Crockery / Kitchen</option>
+<option>Electronics / Mobile Accessories</option>
+<option>Fragrance / Perfume / Attar</option>
+<option>Footwear - Chappal / Sandal</option>
+<option>Footwear - Shoes / Joggers</option>
+<option>Groceries / Khana Peena</option>
+<option>Hair Care / Hair Oil</option>
+<option>Home Decor</option>
+<option>Kids Toys / Khilone</option>
+<option>Kurtis / Kurta / 2-Piece / 3-Piece</option>
+<option>Lawn / Cotton Suits</option>
+<option>Mobile Covers / Chargers</option>
+<option>Other</option>
+<option>Shawls / Dupatta / Stoles</option>
+<option>Sports / Gym</option>
+<option>Sunglasses / Glasses</option>
+<option>Watches / Ghari</option>
+<option>Wallet / Belt</option>
+<option>Winter / Sweater / Hoodie</option>
+</select>
+<input id="otherCat" name="otherCat" placeholder="Apni Category Likho - Ex: Baby Diapers, Car Accessories" style="display:none;margin-top:8px">
+
+<script>
+function checkOtherCat(){
+  let v = document.getElementById('catSelect').value;
+  document.getElementById('otherCat').style.display = (v=='Other') ? 'block' : 'none';
+  if(v=='Other') document.getElementById('otherCat').required = true;
+  else document.getElementById('otherCat').required = false;
+}
+</script>
+
+<div class="calc-box" id="calcBox">Tumhara rate likho, hisaab aa jayega...</div>
+
+<button class="btn btn-gold" style="width:100%">✅ Product Bhejo - Admin Approve Karega</button><p id="msg"></p>
+</form></div>
+
+<br>
+<div class="card"><div class="pad"><h3>📦 Mere Bheje Hue Products</h3><div id="myProducts">Loading...</div></div></div>
+</div>
+
+<footer><h3>SKY SHOPPING</h3><p>support@skyshopping109@gmail.com | Lahore, Pakistan</p><p>© 2026 Sky Shopping - Supplier Panel</p></footer>
+
+<script>
+let uploadedPic = '';
+
+function previewPic(input){
+  let file = input.files[0];
+  if(!file) return;
+  let reader = new FileReader();
+  reader.onload = function(e){
+    uploadedPic = e.target.result;
+    let img = document.getElementById('picPreview');
+    img.src = uploadedPic; img.style.display='block';
+    document.getElementById('picStatus').innerText = '✅ Pic select ho gayi - ' + file.name;
+    document.getElementById('imageLink').value = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function calcSupplier(){
+  let rate = Number(document.getElementById('rateInput').value||0);
+  if(!rate){ document.getElementById('calcBox').innerText='Tumhara rate likho, hisaab aa jayega...'; return; }
+  document.getElementById('calcBox').innerHTML = `Tumhara Rate: <b>Rs. ${rate}</b> <br> Sky Fee: <b>- Rs. 100</b> <br> <b style="color:green">Tumhe Milega: Rs. ${rate-100} per order</b> <br><span style="font-size:11px;color:#666">Reseller apna profit upar se khud lagayega, tumhe is se farq nahi parega.</span>`;
+}
+
+async function show(){
+  try{
+    let snap = await db.collection('sky_products').orderBy('createdAt','desc').limit(50).get();
+    let list=[];
+    snap.forEach(d=>{ let p=d.data(); p.docId=d.id; list.push(p); });
+    let myShop = localStorage.getItem('sky_supplier_shop')||'';
+    if(myShop) list = list.filter(p=>((p.supplier||p.supplierName||p.shop||'').toLowerCase().includes(myShop.toLowerCase())));
+    document.getElementById('myProducts').innerHTML = list.map(p=>`<p style="border-bottom:1px solid #eee;padding:8px 0"><b>${p.name}</b> - Rate: Rs. ${p.price||p.supplierPrice} | ${p.category||''} | <b style="color:${p.status=='Approved'?'green':p.status=='Rejected'?'red':'orange'}">${p.status||'Pending'}</b></p>`).join('') || 'Abhi koi product nahi bheja.';
+  }catch(e){ document.getElementById('myProducts').innerText='Load nahi hua'; }
+}
+
+document.getElementById('supplierForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  let d = Object.fromEntries(new FormData(e.target).entries());
+  let supplierPrice = parseInt(d.supplierPrice);
+  let finalImg = uploadedPic || d.image || 'https://via.placeholder.com/400x400?text=SKY';
+  if(!uploadedPic && !d.image) return alert('Pic lagao - Gallery se chuno ya Link paste karo');
+  // ✅ FIX: Other Category ko sahi se lo
+  let finalCat = d.category=='Other' ? (d.otherCat||'Other') : d.category;
+  localStorage.setItem('sky_supplier_shop', d.shopName);
+  localStorage.setItem('sky_supplier_wa', d.whatsapp);
+  // ✅ FIX: Sab naam ek saath bhejo - taake har page ko mil jaye
+  let product = { 
+    name:d.productName, 
+    supplier:d.shopName, supplierName:d.shopName, shop:d.shopName, shopName:d.shopName,
+    owner:d.ownerName, ownerName:d.ownerName, name2:d.ownerName,
+    whatsapp:d.whatsapp, phone:d.whatsapp,
+    price:supplierPrice, supplierPrice:supplierPrice,
+    stock:Number(d.stock), img:finalImg, image:finalImg,
+    desc:d.desc, description:d.desc,
+    category:finalCat, city:d.city||'',
+    status:'Pending', createdAt:Date.now(), date:new Date().toLocaleString() 
+  };
+  document.getElementById('msg').innerText='Saving...';
+  try{ 
+    await db.collection('sky_products').add(product); 
+    // ✅ FIX: Supplier ko bhi alag se save karo - taake Dashboard login ho sake
+    await db.collection('sky_suppliers').add({ shop:d.shopName, shopName:d.shopName, supplierName:d.shopName, name:d.ownerName, ownerName:d.ownerName, whatsapp:d.whatsapp, phone:d.whatsapp, city:d.city||'', category:finalCat, createdAt:Date.now() });
+  }catch(err){ document.getElementById('msg').innerText='❌ Save nahi hua - firebase-config.js check karo'; console.log(err); return; }
+  document.getElementById('msg').innerText='✅ Added! Admin approve karega to live hoga. Tumhe milega Rs. '+(supplierPrice-100)+' per order.';
+  e.target.reset(); uploadedPic=''; document.getElementById('picPreview').style.display='none'; show();
+});
+show();
+</script></body></html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Supplier Dashboard - SKY SHOPPING</title><link rel="stylesheet" href="style9.css"><link rel="stylesheet" href="css.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<style>
+.stat{background:#0a1a3d;color:#fff;border-radius:16px;padding:16px;text-align:center;margin-bottom:12px}
+.stat.green{background:#0a7a42}.stat.orange{background:#e67e22}.stat.gold{background:#eab308;color:#000}
+.lock-box{background:#fff3cd;border:1px solid #ffe082;padding:14px;border-radius:14px;font-size:13px;margin:12px 0}
+</style>
+</head>
+<body><header><div class="top"><div class="logo"></div><h1>SKY <span>SHOPPING</span></h1></div><nav><a href="index.html">Home</a><a href="products.html">Products</a><a href="supplier.html">Supplier</a><a href="supplier-dashboard.html" class="active">My Dashboard</a><a href="Account.html">My Account</a><a href="admin.html">Admin</a></nav></header>
+
+<div class="sec">
+<div id="loginBox" class="form-box"><h2>🔒 Supplier Dashboard</h2>
+<p style="font-size:13px;color:#666">Apna data sirf aap dekh sakte ho. Koi aur nahi dekh sakta.</p>
+<div class="lock-box">⚠️ <b>Strong Security:</b> Shop Name + WhatsApp Number dono wahi likho jo Supplier Form me likha tha. Dono milenge tabhi account khulega.</div>
+<form id="loginForm">
+<input name="shop" id="shopInput" placeholder="Shop Ka Naam - Ex: Ahmed Shoes" required>
+<input name="whatsapp" id="waInput" placeholder="WhatsApp Number - 03xx... (Yahi aapka Password hai)" required>
+<button class="btn btn-gold" style="width:100%">🔓 Mera Account Kholo</button><p id="loginMsg"></p>
+</form>
+<p style="font-size:12px;text-align:center">Bhool gaye ho? Admin ko WhatsApp karo - support@skyshopping109@gmail.com</p>
+</div>
+
+<div id="dashBox" style="display:none">
+<div style="display:flex;justify-content:space-between;align-items:center"><h2>👋 <span id="shopNameShow"></span></h2><button class="btn" onclick="logout()" style="background:#c00;color:#fff">Logout 🔒</button></div>
+<p style="font-size:12px;color:green">✅ Verified - Sirf aapka data dikh raha hai</p>
+
+<div class="stat"><span>Total Orders</span><h2 id="totalOrders" style="margin:4px 0">0</h2></div>
+<div class="stat green"><span>Done Orders</span><h2 id="doneOrders" style="margin:4px 0">0</h2></div>
+<div class="stat orange"><span>Pending Orders</span><h2 id="pendingOrders" style="margin:4px 0">0</h2></div>
+<div class="stat gold"><span>Total Banta Hai (Aapka Paisa)</span><h2 id="totalPaisa" style="margin:4px 0">Rs. 0</h2><span style="font-size:12px">Sky Fee Rs. 100 per order kaat ke</span></div>
+
+<div class="card"><div class="pad"><h3>📦 Mere Products</h3><div id="myProducts">Loading...</div></div></div><br>
+<div class="card"><div class="pad"><h3>📦 Mere Orders</h3><div id="myOrders">Loading...</div></div></div><br>
+<div class="card"><div class="pad"><h3>💰 Payment History</h3><div id="myPayments">Jab Admin payment bhejega to yahan likha aayega.</div></div></div>
+</div>
+</div>
+
+<footer><h3>SKY SHOPPING</h3><p>support@skyshopping109@gmail.com | Lahore, Pakistan</p><p>© 2026 Sky Shopping - Supplier Panel • Aapka Data Safe Hai</p></footer>
+
+<script>
+let myShop='', myWa='';
+
+function cleanWa(v){ return (v||'').toString().replace(/[^0-9]/g,''); }
+function waMatch(a,b){
+  a=cleanWa(a); b=cleanWa(b);
+  if(!a||!b) return false;
+  return a==b || a.endsWith(b.slice(-10)) || b.endsWith(a.slice(-10));
+}
+function getShopName(obj){
+  return (obj.shop || obj.shopName || obj.supplierName || obj.supplier || obj.name || '').toString().trim();
+}
+function getWa(obj){
+  return obj.whatsapp || obj.phone || obj.whatsappNumber || obj.number || '';
+}
+
+function logout(){
+  localStorage.removeItem('sky_supplier_shop');
+  localStorage.removeItem('sky_supplier_wa');
+  location.reload();
+}
+
+window.onload = function(){
+  let s = localStorage.getItem('sky_supplier_shop');
+  let w = localStorage.getItem('sky_supplier_wa');
+  if(s && w){ myShop=s; myWa=w; openDashboard(); }
+};
+
+document.getElementById('loginForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  let shop = document.getElementById('shopInput').value.trim();
+  let wa = cleanWa(document.getElementById('waInput').value);
+  document.getElementById('loginMsg').innerText='Check kar rahe hain...';
+
+  try{
+    let found = false;
+    // ✅ FIX 1: Pehle sky_suppliers me check karo - jahan Form bhara tha
+    try{
+      let sSnap = await db.collection('sky_suppliers').get();
+      sSnap.forEach(d=>{
+        let s = d.data();
+        if(getShopName(s).toLowerCase()==shop.toLowerCase() && waMatch(getWa(s), wa)) found=true;
+      });
+    }catch(err){ console.log('suppliers check',err); }
+
+    // ✅ FIX 2: Agar suppliers me nahi mila to products me bhi check karo
+    if(!found){
+      let snap = await db.collection('sky_products').get();
+      snap.forEach(d=>{
+        let p=d.data();
+        if(getShopName(p).toLowerCase()==shop.toLowerCase() && waMatch(getWa(p), wa)) found=true;
+      });
+    }
+
+    if(!found){ document.getElementById('loginMsg').innerText='❌ Galat Shop Name ya WhatsApp Number! Dono wahi likho jo Supplier Form me likha tha.'; return; }
+
+    myShop=shop; myWa=wa;
+    localStorage.setItem('sky_supplier_shop', shop);
+    localStorage.setItem('sky_supplier_wa', wa);
+    openDashboard();
+  }catch(err){ document.getElementById('loginMsg').innerText='❌ Error - Firebase check karo'; console.log(err); }
+});
+
+function openDashboard(){
+  document.getElementById('loginBox').style.display='none';
+  document.getElementById('dashBox').style.display='block';
+  document.getElementById('shopNameShow').innerText = myShop;
+  loadData();
+}
+
+async function loadData(){
+  try{
+    let snap = await db.collection('sky_products').get();
+    let myProds=[];
+    snap.forEach(d=>{ let p=d.data(); p.docId=d.id; 
+      // ✅ Shop naam se match karo - chahe field ka naam kuch bhi ho
+      if(getShopName(p).toLowerCase()==myShop.toLowerCase() && waMatch(getWa(p), myWa)) myProds.push(p);
+    });
+
+    // ✅ FIX: price ya supplierPrice jo bhi ho
+    document.getElementById('myProducts').innerHTML = myProds.map(p=>{
+      let price = p.price || p.supplierPrice || 0;
+      let stock = p.stock ?? p.quantity ?? '—';
+      let status = p.status || 'Pending';
+      return `<p style="border-bottom:1px solid #eee;padding:8px 0"><b>${p.name}</b> - Rs. ${price} | Stock: ${stock} | <b style="color:${status=='Approved'?'green':status=='Rejected'?'red':'orange'}">${status}</b></p>`;
+    }).join('') || 'Koi product nahi. Pehle Supplier Form se Product bhejo.';
+
+    let oSnap = await db.collection('sky_orders').orderBy('createdAt','desc').limit(100).get();
+    let myOrders=[];
+    oSnap.forEach(d=>{ let o=d.data(); let isMine = myProds.some(p=>p.docId==o.productId || p.name==o.product); if(isMine) myOrders.push(o); });
+
+    let done = myOrders.filter(o=>o.status=='Delivered'||o.status=='Done').length;
+    let pending = myOrders.filter(o=>o.status=='Pending').length;
+    // ✅ FIX: Quantity se guna karo, -100 se bacho
+    let totalPaisa = myOrders.filter(o=>o.status=='Delivered'||o.status=='Done').reduce((s,o)=>{
+      let base = Number(o.supplierPrice||0) * Number(o.quantity||1);
+      return s + Math.max(0, base - 100);
+    }, 0);
+
+    document.getElementById('totalOrders').innerText = myOrders.length;
+    document.getElementById('doneOrders').innerText = done;
+    document.getElementById('pendingOrders').innerText = pending;
+    document.getElementById('totalPaisa').innerText = 'Rs. ' + totalPaisa;
+    document.getElementById('myOrders').innerHTML = myOrders.map(o=>`<p style="border-bottom:1px solid #eee;padding:8px 0"><b>${o.id}</b> - ${o.product} - <b>${o.status}</b><br><span style="font-size:12px;color:#666">${o.customer} - ${o.phone} - ${o.city||''}</span></p>`).join('') || 'Abhi koi order nahi.';
+  }catch(e){ document.getElementById('myProducts').innerText='Load nahi hua - Firebase check karo'; console.log(e); }
+}
+</script></body></html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Order - SKY SHOPPING</title><link rel="stylesheet" href="style9.css"><link rel="stylesheet" href="css.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+</head>
+<body><header><div class="top"><div class="logo"></div><h1>SKY <span>SHOPPING</span></h1></div><nav><a href="index.html">Home</a><a href="products.html">Products</a><a href="order.html" class="active">Order</a><a href="Account.html">My Account</a><a href="withdraw.html">Withdraw</a><a href="admin.html">Admin</a></nav></header>
+<div class="form-box"><h2>Place Order</h2><div id="prodInfo" style="background:#f0f4ff;padding:12px;border-radius:12px;margin:10px 0">Loading...</div>
+
+<div style="background:#fff8e1;padding:12px;border-radius:12px;margin:10px 0;border:1px solid #ffe082">
+<label style="font-weight:700;font-size:14px">💰 Apna Profit Set Karo (Apni Marzi Se)</label><br>
+<span id="profitHint" style="font-size:12px;color:#666">Max Profit: Product Price jitna</span>
+<input id="myProfit" type="number" min="100" value="200" placeholder="Apna Profit Likho - Ex: 200" style="margin-top:8px">
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+<button type="button" class="btn" onclick="setProfit(200)" style="padding:6px 12px;font-size:12px">+ Rs. 200</button>
+<button type="button" class="btn" onclick="setProfit(500)" style="padding:6px 12px;font-size:12px">+ Rs. 500</button>
+<button type="button" class="btn" onclick="setProfit(800)" style="padding:6px 12px;font-size:12px">+ Rs. 800</button>
+<button type="button" class="btn" onclick="setProfit(1000)" style="padding:6px 12px;font-size:12px">+ Rs. 1000</button>
+</div>
+<p id="profitError" style="color:red;font-size:13px;margin:6px 0 0"></p>
+</div>
+
+<form id="orderForm"><input name="customer" placeholder="Customer Name" required><input name="phone" placeholder="Customer Phone 03xx..." required><input name="city" placeholder="City - Ex: Lahore" required><textarea name="address" placeholder="Full Address" required></textarea><input name="quantity" type="number" value="1" min="1"><button class="btn btn-gold" id="orderBtn">Confirm Order - COD</button><p id="msg"></p></form><p style="font-size:12px;text-align:center;margin-top:10px">Cash on Delivery • <a href="return.html">Return Policy</a></p></div>
+<script>
+let params = new URLSearchParams(location.search);
+let productDocId = params.get('product');
+let p = JSON.parse(localStorage.getItem('selectedProduct') || '{"code":"P001","name":"Kurta Set","price":"4000"}');
+let currentProduct = { ...p, supplierPrice: Number(p.price), docId: null };
+
+function setProfit(v){ document.getElementById('myProfit').value = v; updatePrice(); }
+
+function updatePrice(){
+  let profitInput = document.getElementById('myProfit');
+  let profit = Number(profitInput.value || 0);
+  let maxProfit = Number(currentProduct.supplierPrice);
+  let err = document.getElementById('profitError');
+  let btn = document.getElementById('orderBtn');
+
+  if(profit < 100){ err.innerText='⚠️ Kam se kam Rs. 100 profit rakho'; btn.disabled=true; btn.style.opacity='0.5'; }
+  else if(profit > maxProfit){ err.innerText='❌ Profit Rs. '+maxProfit+' se zyada nahi rakh sakte!'; btn.disabled=true; btn.style.opacity='0.5'; }
+  else { err.innerText=''; btn.disabled=false; btn.style.opacity='1'; }
+
+  let total = Number(currentProduct.supplierPrice) + profit;
+  document.getElementById('prodInfo').innerHTML = `<b>${currentProduct.name}</b> (${currentProduct.code})<br>Product Price: Rs. ${currentProduct.supplierPrice} + Your Profit: Rs. ${profit} = <b>Selling Price: Rs. ${total}</b>`;
+  document.getElementById('profitHint').innerText = 'Max Profit: Rs. '+maxProfit+' • Min: Rs. 100';
+  window._total = total;
+  window._profit = profit;
+  return profit;
+}
+
+async function loadProduct(){
+  if(productDocId){
+    try{
+      let doc = await db.collection('sky_products').doc(productDocId).get();
+      if(doc.exists){
+        let d = doc.data();
+        // ✅ FIX: price ya supplierPrice jo bhi ho, wahi lo
+        let basePrice = d.price || d.supplierPrice || 0;
+        currentProduct = { code: productDocId.slice(0,6).toUpperCase(), name: d.name, supplierPrice: basePrice, img: d.img, docId: productDocId };
+      }
+    }catch(e){ console.log(e); }
+  }
+  document.getElementById('myProfit').max = currentProduct.supplierPrice;
+  updatePrice();
+}
+document.getElementById('myProfit').addEventListener('input', updatePrice);
+
+document.getElementById('orderForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  let profit = updatePrice();
+  let maxProfit = Number(currentProduct.supplierPrice);
+  if(profit < 100) return alert('Kam se kam Rs. 100 profit rakho');
+  if(profit > maxProfit) return alert('Profit Rs. '+maxProfit+' se zyada nahi rakh sakte!');
+  let d = Object.fromEntries(new FormData(e.target).entries());
+  let orderId = 'ORD-' + Math.floor(1000+Math.random()*9000);
+  let resellerName = localStorage.getItem('userName') || localStorage.getItem('sky_reseller_name') || 'Guest Reseller';
+  let resellerPhone = localStorage.getItem('userPhone') || localStorage.getItem('sky_reseller_phone') || '';
+  let total = window._total;
+  // ✅ FIX: Admin wale naam se bhejo - sellPrice, profit, city, resellerPhone
+  let order = {
+    id: orderId, product: currentProduct.name, productId: currentProduct.docId || currentProduct.code,
+    sellPrice: total, price: total, supplierPrice: Number(currentProduct.supplierPrice),
+    profit: profit, resellerProfit: profit,
+    customer: d.customer, phone: d.phone, city: d.city, address: d.address,
+    quantity: Number(d.quantity||1), reseller: resellerName, resellerPhone: resellerPhone,
+    status: 'Pending',
+    createdAt: Date.now(), date: new Date().toLocaleString()
+  };
+  document.getElementById('msg').innerText = 'Saving order...';
+  try{ await db.collection('sky_orders').add(order); }catch(err){ alert('Firebase me save nahi hua, config check karo'); return; }
+  let list = JSON.parse(localStorage.getItem('orders')||'[]'); list.push({...order, name:order.product, total:order.sellPrice, profit:order.profit}); localStorage.setItem('orders', JSON.stringify(list));
+  document.getElementById('msg').innerText = '✅ Order Saved! ID: '+orderId+' - Aapka Profit: Rs. '+profit;
+  setTimeout(()=>location.href='Account.html',1200);
+});
+loadProduct();
+</script></body></html>

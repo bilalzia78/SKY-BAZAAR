@@ -1,0 +1,10 @@
+*{
+  margin: 0px;
+  padding: 0px;
+}
+h1{
+  color: red;
+}
+.box{
+  height: 350px;
+  width: 250px;

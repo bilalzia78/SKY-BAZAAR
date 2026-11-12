@@ -1,0 +1,92 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Return - SKY SHOPPING</title><link rel="stylesheet" href="style9.css"><link rel="stylesheet" href="css.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+</head>
+<body><header><div class="top"><div class="logo"></div><h1>SKY <span>SHOPPING</span></h1></div><nav><a href="index.html">Home</a><a href="products.html">Products</a><a href="Account.html">My Account</a><a href="return.html" class="active">Return</a><a href="help.html">Help</a><a href="admin.html">Admin</a></nav></header>
+
+<div class="sec">
+<div class="form-box"><h2>↩️ Return / Exchange Request</h2>
+<p style="font-size:13px;color:#666">7 din ke andar return hoga. Product use nahi hona chahiye, tag laga ho. Return courier Rs. 250 customer se katega.</p>
+<form id="returnForm">
+<input name="orderId" placeholder="Order ID - Ex: ORD-1234" required>
+<input name="phone" placeholder="Aapka Phone Number - Jo Order me diya tha" required>
+<select name="reason" required>
+<option value="">Return ki Wajah Chuno</option>
+<option>Size Chota / Bara Hai</option>
+<option>Color Pasand Nahi Aaya</option>
+<option>Product Damage Aaya</option>
+<option>Galat Product Aaya</option>
+<option>Quality Achi Nahi</option>
+<option>Doosra Reason</option>
+</select>
+<textarea name="detail" placeholder="Detail likho - Ex: Shoe ka size 9 mangwaya tha, 10 aa gaya"></textarea>
+<button class="btn btn-gold">Return Request Bhejo</button><p id="msg"></p>
+</form>
+</div>
+
+<br>
+<div class="card"><div class="pad"><h3>📦 Meri Return Requests</h3><p style="font-size:12px;color:#666">Sirf aapke Phone Number wale Returns dikhenge. Doosre ka data nahi dikhega.</p><div id="myReturns">Loading...</div></div></div>
+
+<br>
+<div class="card" style="background:#fff3cd"><div class="pad"><b>↩️ Return Policy - SKY SHOPPING:</b><br><span style="font-size:13px">1. 7 din ke andar return hoga.<br>2. Product use nahi hona chahiye, tag laga ho.<br>3. Return courier Rs. 250 customer se kaat liya jayega.<br>4. Paisa 24-48 ghante me JazzCash / EasyPaisa par wapis aayega.<br>5. Agar product damage hai to photo WhatsApp par bhejo.</span></div></div>
+</div>
+
+<footer><h3>SKY SHOPPING</h3><p>support@skyshopping109@gmail.com | Lahore, Pakistan</p><p>© 2026 Sky Shopping</p></footer>
+
+<script>
+function cleanPhone(v){ return (v||'').toString().replace(/[^0-9]/g,''); }
+
+async function loadMyReturns(){
+  let myPhone = cleanPhone(localStorage.getItem('sky_last_phone') || '');
+  if(!myPhone){ document.getElementById('myReturns').innerText='Apna Phone Number likh ke Return karo, phir yahan dikhega.'; return; }
+  try{
+    // ✅ FIX: Sirf mere Phone wale Returns - Sab ke nahi
+    let snap = await db.collection('sky_orders').where('phone','==',myPhone).get();
+    // Agar Phone se nahi mila to returnPhone se dhoondo
+    if(snap.empty){
+      snap = await db.collection('sky_orders').where('returnPhone','==',myPhone).get();
+    }
+    let list=[];
+    snap.forEach(d=>{ let o=d.data(); if(o.status=='Return Request'||o.status=='Returned'||o.status=='Return Rejected') list.push(o); });
+    document.getElementById('myReturns').innerHTML = list.map(o=>`<p style="border-bottom:1px solid #eee;padding:8px 0"><b>${o.id}</b> - ${o.product} - Rs. ${o.sellPrice||o.price||0} - <b style="color:${o.status=='Returned'?'green':o.status=='Return Rejected'?'red':'orange'}">${o.status}</b><br><span style="font-size:12px;color:#666">Reason: ${o.returnReason||''}</span></p>`).join('') || 'Abhi koi return nahi hai.';
+  }catch(e){ 
+    // Agar where() fail ho to saare me se filter karo - lekin sirf apne Phone wale
+    try{
+      let snap2 = await db.collection('sky_orders').orderBy('createdAt','desc').limit(50).get();
+      let list=[];
+      snap2.forEach(d=>{ let o=d.data(); let p1=cleanPhone(o.phone); let p2=cleanPhone(o.returnPhone); if((p1==myPhone||p2==myPhone) && (o.status=='Return Request'||o.status=='Returned'||o.status=='Return Rejected')) list.push(o); });
+      document.getElementById('myReturns').innerHTML = list.map(o=>`<p style="border-bottom:1px solid #eee;padding:8px 0"><b>${o.id}</b> - ${o.product} - Rs. ${o.sellPrice||o.price||0} - <b>${o.status}</b></p>`).join('') || 'Abhi koi return nahi hai.';
+    }catch(e2){ document.getElementById('myReturns').innerText='Load nahi hua - firebase-config.js check karo'; }
+  }
+}
+
+document.getElementById('returnForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  let d = Object.fromEntries(new FormData(e.target).entries());
+  localStorage.setItem('sky_last_phone', d.phone);
+  document.getElementById('msg').innerText='Dhoond rahe hain...';
+  try{
+    let snap = await db.collection('sky_orders').where('id','==',d.orderId.trim()).get();
+    if(snap.empty){ document.getElementById('msg').innerText='❌ Ye Order ID nahi mila. Order ID dobara check karo - Account me se copy karo.'; return; }
+    let doc = snap.docs[0];
+    let orderData = doc.data();
+    // ✅ FIX: Phone bhi check karo - Koi aur kisi ka Order return na kar de
+    let orderPhone = cleanPhone(orderData.phone);
+    let inputPhone = cleanPhone(d.phone);
+    if(orderPhone && orderPhone !== inputPhone && !orderPhone.endsWith(inputPhone.slice(-10)) && !inputPhone.endsWith(orderPhone.slice(-10))){
+      document.getElementById('msg').innerText='❌ Ye Order is Phone Number ka nahi hai. Wahi number likho jo Order me diya tha.'; return;
+    }
+    let fullReason = d.reason + ' - ' + (d.detail||'');
+    await db.collection('sky_orders').doc(doc.id).update({ status:'Return Request', returnReason: fullReason, returnPhone: d.phone });
+    // ✅ FIX: Admin ke liye alag se bhi save karo
+    try{
+      await db.collection('sky_returns').add({ orderId: d.orderId, product: orderData.product, price: orderData.sellPrice||orderData.price||0, phone: d.phone, reason: d.reason, detail: d.detail||'', status:'Return Request', createdAt: Date.now(), date: new Date().toLocaleString() });
+    }catch(err){ console.log('return save',err); }
+    document.getElementById('msg').innerText='✅ Return Request Admin ko mil gayi! 24h me contact karenge. Rs. 250 courier katega.';
+    e.target.reset();
+    loadMyReturns();
+  }catch(err){ document.getElementById('msg').innerText='❌ Error - dobara try karo'; console.log(err); }
+});
+loadMyReturns();
+</script></body></html>
