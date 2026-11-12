@@ -1,11 +1,11 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>My Account - SKY SHOPPING</title><link rel="stylesheet" href="style9.css"><link rel="stylesheet" href="css.css">
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>My Account - SKY BAZAAR</title><link rel="stylesheet" href="style9.css"><link rel="stylesheet" href="css.css">
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 </head>
-<body><header><div class="top"><div class="logo"></div><h1>SKY <span>SHOPPING</span></h1></div><nav><a href="index.html">Home</a><a href="products.html">Products</a><a href="Account.html" class="active">My Account</a><a href="withdraw.html">Withdraw</a><a href="supplier.html">Supplier</a><a href="admin.html">Admin</a></nav></header>
+<body><header><div class="top"><div class="logo"></div><h1>SKY BAZAAR</span></h1></div><nav><a href="index.html">Home</a><a href="products.html">Products</a><a href="Account.html" class="active">My Account</a><a href="withdraw.html">Withdraw</a><a href="supplier.html">Supplier</a><a href="admin.html">Admin</a></nav></header>
 <div class="sec"><h2 id="userName">Welcome, Sky User 👋</h2><p>Verified Reseller PRO • Level: Gold</p><br><div class="stat"><div>Total Earning<br><b id="earn">Rs. 0</b></div><div>Total Orders<br><b id="ords">0</b></div><div>Balance<br><b id="bal" style="color:green">Rs. 0</b></div></div><br>
-<div class="card"><div class="pad"><h3>👥 Refer & Earn - Rs. 200 per Referral</h3><p id="refLink">https://bilalzia78.github.io/SKY-SHOPPING/?ref=109</p><button class="btn btn-gold" onclick="copyRef()">Copy Referral Link</button></div></div><br>
+<div class="card"><div class="pad"><h3>👥 Refer & Earn - Rs. 200 per Referral</h3><p id="refLink">https://bilalzia78.github.io/SKY-BAZAAR/?ref=109</p><button class="btn btn-gold" onclick="copyRef()">Copy Referral Link</button></div></div><br>
 <div class="card"><div class="pad"><h3>📦 My Orders</h3><div id="orderList">Loading...</div></div></div></div>
 <script>
 function copyRef(){ let link=document.getElementById('refLink').innerText; navigator.clipboard.writeText(link); alert('Link Copied'); }
@@ -13,8 +13,8 @@ function copyRef(){ let link=document.getElementById('refLink').innerText; navig
 async function loadAccount(){
   let myName = localStorage.getItem('userName') || localStorage.getItem('sky_reseller_name') || 'Sky User';
   document.getElementById('userName').innerText='Welcome, '+myName+' 👋';
-  // ✅ FIX: Sahi link - SKY-SHOPPING
-  document.getElementById('refLink').innerText='https://bilalzia78.github.io/SKY-SHOPPING/?ref='+encodeURIComponent(myName);
+  // ✅ FIX: Sahi link - SKY-BAZAAR 
+  document.getElementById('refLink').innerText='https://bilalzia78.github.io/SKY-BAZAAR/?ref='+encodeURIComponent(myName);
 
   let oldOrders = JSON.parse(localStorage.getItem('orders')||'[]');
   let myOrders = [];
