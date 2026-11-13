@@ -2,6 +2,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="saving.js"></script>
 <style>
 .info-box{background:#e8f5e9;border:1px solid #a5d6a7;padding:14px;border-radius:14px;margin:12px 0;font-size:13px;line-height:1.6}
 .info-box b{color:#0a7a42}
@@ -146,11 +147,9 @@ document.getElementById('supplierForm').addEventListener('submit', async e=>{
   let supplierPrice = parseInt(d.supplierPrice);
   let finalImg = uploadedPic || d.image || 'https://via.placeholder.com/400x400?text=SKY';
   if(!uploadedPic && !d.image) return alert('Pic lagao - Gallery se chuno ya Link paste karo');
-  // ✅ FIX: Other Category ko sahi se lo
   let finalCat = d.category=='Other' ? (d.otherCat||'Other') : d.category;
   localStorage.setItem('sky_supplier_shop', d.shopName);
   localStorage.setItem('sky_supplier_wa', d.whatsapp);
-  // ✅ FIX: Sab naam ek saath bhejo - taake har page ko mil jaye
   let product = { 
     name:d.productName, 
     supplier:d.shopName, supplierName:d.shopName, shop:d.shopName, shopName:d.shopName,
@@ -162,12 +161,13 @@ document.getElementById('supplierForm').addEventListener('submit', async e=>{
     category:finalCat, city:d.city||'',
     status:'Pending', createdAt:Date.now(), date:new Date().toLocaleString() 
   };
+  try{ showSaving('Aapka Product Save Ho Raha Hai...'); }catch(e2){}
   document.getElementById('msg').innerText='Saving...';
   try{ 
     await db.collection('sky_products').add(product); 
-    // ✅ FIX: Supplier ko bhi alag se save karo - taake Dashboard login ho sake
     await db.collection('sky_suppliers').add({ shop:d.shopName, shopName:d.shopName, supplierName:d.shopName, name:d.ownerName, ownerName:d.ownerName, whatsapp:d.whatsapp, phone:d.whatsapp, city:d.city||'', category:finalCat, createdAt:Date.now() });
-  }catch(err){ document.getElementById('msg').innerText='❌ Save nahi hua - firebase-config.js check karo'; console.log(err); return; }
+  }catch(err){ try{ hideSaving(); }catch(e2){} document.getElementById('msg').innerText='❌ Save nahi hua - firebase-config.js check karo'; console.log(err); return; }
+  try{ hideSaving('Ho Gaya! Product Save Ho Gaya!'); }catch(e2){}
   document.getElementById('msg').innerText='✅ Added! Admin approve karega to live hoga. Tumhe milega Rs. '+(supplierPrice-100)+' per order.';
   e.target.reset(); uploadedPic=''; document.getElementById('picPreview').style.display='none'; show();
 });
