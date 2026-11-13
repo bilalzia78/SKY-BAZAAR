@@ -9,7 +9,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
-<script src="saving.js"></script>
 <style>
 .tab-row{display:flex;gap:8px;overflow-x:auto;padding:10px 0}
 .tab-row button{padding:9px 16px;border:1px solid #ddd;border-radius:20px;background:#fff;white-space:nowrap;cursor:pointer}
@@ -33,11 +32,9 @@
 <div id="loginBox" class="form-box">
 <h2>🔐 Admin Login</h2>
 <p style="font-size:13px;color:#666">Password: sky123 (s chota)</p>
-<form id="loginForm">
-<input id="passInput" type="password" placeholder="Admin Password likho" required>
-<button class="btn btn-gold" style="width:100%">Admin Kholo →</button>
+<input id="passInput" type="password" placeholder="Admin Password likho">
+<button class="btn btn-gold" style="width:100%;margin-top:10px" onclick="tryLogin()">Admin Kholo →</button>
 <p id="loginMsg"></p>
-</form>
 <p style="font-size:12px;color:#888">Password bhool gaye? <a href="admin.html?reset=1">Yahan click karke Reset karo</a></p>
 </div>
 
@@ -94,6 +91,11 @@
 <footer><h3>SKY BAZAAR</h3><p>support@skybazaar.pakistan@gmail.com</p></footer>
 
 <script>
+function showSaving(t){ try{ let d=document.getElementById('savingPopup'); if(!d){ d=document.createElement('div'); d.id='savingPopup'; d.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:#000a;display:flex;align-items:center;justify-content:center;z-index:9999;color:#fff;font-size:18px;font-weight:700'; document.body.appendChild(d);} d.style.display='flex'; d.innerText=t||'Saving...'; }catch(e){} }
+function hideSaving(t){ try{ let d=document.getElementById('savingPopup'); if(d){ if(t) d.innerText=t; setTimeout(function(){d.style.display='none';},800); } }catch(e){} }
+</script>
+
+<script>
 let allOrders=[], allProducts=[], allResellers=[], allSuppliers=[], allWithdraw=[], allReturns=[];
 let activeTab='orders';
 
@@ -119,16 +121,27 @@ function changePassword(){
   if(newP === oldP){ msg.innerText='❌ Naya password purane se alag rakho'; return; }
   let e = isStrong(newP);
   if(e){ msg.innerText='❌ ' + e; return; }
-  try{ showSaving('Password Change Ho Raha Hai...'); }catch(e2){}
   localStorage.setItem('sky_admin_pass', newP);
   msg.innerText='✅ Password Change ho gaya!';
-  try{ hideSaving('Ho Gaya! Password Change Ho Gaya!'); }catch(e2){}
   alert('✅ Password Change ho gaya! Naya password: ' + newP);
   document.getElementById('oldPass').value=''; document.getElementById('newPass').value=''; document.getElementById('newPass2').value='';
 }
 function adminLogout(){ localStorage.removeItem('sky_admin_login'); location.reload(); }
 
-window.onload = function(){
+function tryLogin(){
+  let p = document.getElementById('passInput').value;
+  if(!p){ document.getElementById('loginMsg').innerText='❌ Pehle password likho'; return; }
+  if(p === getAdminPass() || p === 'sky123'){
+    localStorage.setItem('sky_admin_login','yes');
+    document.getElementById('loginBox').style.display='none';
+    document.getElementById('dashBox').style.display='block';
+    loadAll();
+  } else {
+    document.getElementById('loginMsg').innerText='❌ Password galat hai - Sahi hai: sky123 (s chota)';
+  }
+}
+
+window.addEventListener('load', function(){
   if(window.location.search.includes('reset=1')){
     localStorage.removeItem('sky_admin_pass');
     localStorage.removeItem('sky_admin_lock');
@@ -141,21 +154,6 @@ window.onload = function(){
     document.getElementById('loginBox').style.display='none';
     document.getElementById('dashBox').style.display='block';
     loadAll();
-  }
-};
-
-document.getElementById('loginForm').addEventListener('submit', function(e){
-  e.preventDefault();
-  let p = document.getElementById('passInput').value;
-  if(p === getAdminPass() || p === 'sky123'){
-    try{ showSaving('Admin Login Ho Raha Hai...'); }catch(e2){}
-    localStorage.setItem('sky_admin_login','yes');
-    document.getElementById('loginBox').style.display='none';
-    document.getElementById('dashBox').style.display='block';
-    try{ hideSaving('Ho Gaya! Admin Khul Gaya!'); }catch(e2){}
-    loadAll();
-  } else {
-    document.getElementById('loginMsg').innerText='❌ Password galat hai - Sahi hai: sky123 (s chota)';
   }
 });
 
@@ -252,8 +250,4 @@ async function loadAll(){
   document.getElementById('cPending').innerText = allProducts.filter(p=>p.status=='Pending'||!p.status).length;
   document.getElementById('cApproved').innerText = allProducts.filter(p=>p.status=='Approved').length;
   document.getElementById('cWithdraw').innerText = allWithdraw.filter(w=>w.status=='Pending').length;
-  document.getElementById('cReturns').innerText = allReturns.filter(r=>r.status=='Return Request').length;
-  document.getElementById('cSupPay').innerText = 'Rs. ' + supBaaki;
-  document.getElementById('cResPay').innerText = 'Rs. ' + resBaaki;
-  let totalProfit = allOrders.filter(o=>o.status=='Delivered').reduce((s,o)=>s+Number(o.profit||o.resellerProfit||0),0);
-  document.getElementById('cProfit').innerText = 'Rs. ' + to
+  document.getElementById('cReturns').innerText = allReturns.filter(r=>
