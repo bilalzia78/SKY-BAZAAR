@@ -2,6 +2,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="saving.js"></script>
 </head>
 <body><header><div class="top"><div class="logo"></div><h1>SKY <span>BAZAAR</span></h1></div><nav><a href="index.html">Home</a><a href="products.html">Products</a><a href="Account.html">My Account</a><a href="return.html" class="active">Return</a><a href="help.html">Help</a><a href="admin.html">Admin</a></nav></header>
 
@@ -41,9 +42,7 @@ async function loadMyReturns(){
   let myPhone = cleanPhone(localStorage.getItem('sky_last_phone') || '');
   if(!myPhone){ document.getElementById('myReturns').innerText='Apna Phone Number likh ke Return karo, phir yahan dikhega.'; return; }
   try{
-    // ✅ FIX: Sirf mere Phone wale Returns - Sab ke nahi
     let snap = await db.collection('sky_orders').where('phone','==',myPhone).get();
-    // Agar Phone se nahi mila to returnPhone se dhoondo
     if(snap.empty){
       snap = await db.collection('sky_orders').where('returnPhone','==',myPhone).get();
     }
@@ -51,7 +50,6 @@ async function loadMyReturns(){
     snap.forEach(d=>{ let o=d.data(); if(o.status=='Return Request'||o.status=='Returned'||o.status=='Return Rejected') list.push(o); });
     document.getElementById('myReturns').innerHTML = list.map(o=>`<p style="border-bottom:1px solid #eee;padding:8px 0"><b>${o.id}</b> - ${o.product} - Rs. ${o.sellPrice||o.price||0} - <b style="color:${o.status=='Returned'?'green':o.status=='Return Rejected'?'red':'orange'}">${o.status}</b><br><span style="font-size:12px;color:#666">Reason: ${o.returnReason||''}</span></p>`).join('') || 'Abhi koi return nahi hai.';
   }catch(e){ 
-    // Agar where() fail ho to saare me se filter karo - lekin sirf apne Phone wale
     try{
       let snap2 = await db.collection('sky_orders').orderBy('createdAt','desc').limit(50).get();
       let list=[];
@@ -71,22 +69,22 @@ document.getElementById('returnForm').addEventListener('submit', async e=>{
     if(snap.empty){ document.getElementById('msg').innerText='❌ Ye Order ID nahi mila. Order ID dobara check karo - Account me se copy karo.'; return; }
     let doc = snap.docs[0];
     let orderData = doc.data();
-    // ✅ FIX: Phone bhi check karo - Koi aur kisi ka Order return na kar de
     let orderPhone = cleanPhone(orderData.phone);
     let inputPhone = cleanPhone(d.phone);
     if(orderPhone && orderPhone !== inputPhone && !orderPhone.endsWith(inputPhone.slice(-10)) && !inputPhone.endsWith(orderPhone.slice(-10))){
       document.getElementById('msg').innerText='❌ Ye Order is Phone Number ka nahi hai. Wahi number likho jo Order me diya tha.'; return;
     }
     let fullReason = d.reason + ' - ' + (d.detail||'');
+    try{ showSaving('Aapki Return Request Save Ho Rahi Hai...'); }catch(e2){}
     await db.collection('sky_orders').doc(doc.id).update({ status:'Return Request', returnReason: fullReason, returnPhone: d.phone });
-    // ✅ FIX: Admin ke liye alag se bhi save karo
     try{
       await db.collection('sky_returns').add({ orderId: d.orderId, product: orderData.product, price: orderData.sellPrice||orderData.price||0, phone: d.phone, reason: d.reason, detail: d.detail||'', status:'Return Request', createdAt: Date.now(), date: new Date().toLocaleString() });
     }catch(err){ console.log('return save',err); }
+    try{ hideSaving('Ho Gaya! Return Request Save Ho Gayi!'); }catch(e2){}
     document.getElementById('msg').innerText='✅ Return Request Admin ko mil gayi! 24h me contact karenge. Rs. 250 courier katega.';
     e.target.reset();
     loadMyReturns();
-  }catch(err){ document.getElementById('msg').innerText='❌ Error - dobara try karo'; console.log(err); }
+  }catch(err){ try{ hideSaving(); }catch(e2){} document.getElementById('msg').innerText='❌ Error - dobara try karo'; console.log(err); }
 });
 loadMyReturns();
 </script></body></html>
