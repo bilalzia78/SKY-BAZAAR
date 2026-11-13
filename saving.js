@@ -1,57 +1,52 @@
+// SKY BAZAAR - Saving Popup + Sound System
+let _savingBox = null;
 
-// SKY BAZAAR - Saving Popup - SAB FILES KE LIYE - FINAL VERSION
-let skyProgTimer = null;
-
-function createSavingPopup(){
-  if(document.getElementById('savingOverlay')) return;
-  var css = document.createElement('style');
-  css.innerHTML = "#savingOverlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:99999;justify-content:center;align-items:center;padding:20px;box-sizing:border-box}#savingOverlay .saveBox{background:#fff;width:100%;max-width:320px;padding:28px 20px;border-radius:20px;text-align:center;box-shadow:0 10px 40px #0008}.spinner{width:55px;height:55px;border:5px solid #ffe9a8;border-top:5px solid #f5a800;border-radius:50%;margin:0 auto 14px auto;animation:skySpin 0.8s linear infinite}@keyframes skySpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}.saveDots:after{content:'';animation:skyDots 1s infinite}@keyframes skyDots{0%{content:''}33%{content:'.'}66%{content:'..'}100%{content:'...'}}.progressBar{width:100%;height:8px;background:#eee;border-radius:10px;overflow:hidden;margin-top:14px}.progressBar div{height:100%;width:0%;background:linear-gradient(90deg,#FFD700,#f5a800);border-radius:10px;transition:width 0.4s}";
-  document.head.appendChild(css);
-  var div = document.createElement('div');
-  div.id = 'savingOverlay';
-  div.innerHTML = '<div class="saveBox"><div class="spinner"></div><h3 style="margin:0;color:#0a1a3d">⏳ Zara Rukiye<span class="saveDots"></span></h3><p id="saveMsgBig">Save Ho Raha Hai...<br><b style="color:red">⚠️ Back Ya Refresh Mat Dabaiye</b><br><span style="font-size:12px;color:#888">Thora wait karein, 2-5 second lagenge</span></p><div class="progressBar"><div id="saveProgress"></div></div><p style="font-size:12px;color:#888;margin:8px 0 0 0" id="savePercent">0% Ho Gaya...</p></div>';
-  document.body.appendChild(div);
+function playSound(type){
+  try{
+    // Web Audio se sound - koi file download nahi karni
+    let ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if(type=='start'){
+      // Saving shuru - 1 lambi Ting
+      let o = ctx.createOscillator(); let g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type='sine'; o.frequency.value=880;
+      g.gain.setValueAtTime(0.3, ctx.currentTime);
+      o.start(); o.stop(ctx.currentTime+0.4);
+    } else {
+      // Ho gaya - 2 choti Ting-Ting
+      [523, 784].forEach((f,i)=>{
+        let o = ctx.createOscillator(); let g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type='sine'; o.frequency.value=f;
+        let t = ctx.currentTime + i*0.18;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.3, t+0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t+0.3);
+        o.start(t); o.stop(t+0.35);
+      });
+    }
+    // Mobile pe vibrate bhi
+    if(navigator.vibrate) navigator.vibrate(type=='start' ? 100 : [80,50,80]);
+  }catch(e){}
 }
 
-if(document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', createSavingPopup);
-} else {
-  createSavingPopup();
+function showSaving(msg){
+  playSound('start'); // 🔔 Saving wali awaz
+  if(_savingBox) _savingBox.remove();
+  _savingBox = document.createElement('div');
+  _savingBox.id = 'skySavingBox';
+  _savingBox.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;';
+  _savingBox.innerHTML = '<div style="background:#fff;padding:24px 20px;border-radius:18px;text-align:center;max-width:300px;width:90%;box-shadow:0 10px 30px rgba(0,0,0,0.3)"><div style="font-size:44px">⏳</div><div style="font-size:16px;font-weight:700;margin:10px 0 4px">Zara Rukiye...</div><div style="font-size:13px;color:#666">'+(msg||'Save Ho Raha Hai...')+'</div><div style="margin-top:12px"><span style="display:inline-block;width:30px;height:30px;border:3px solid #eee;border-top:3px solid #0a7a42;border-radius:50%;animation:skySpin 0.8s linear infinite"></span></div><style>@keyframes skySpin{to{transform:rotate(360deg)}}</style></div>';
+  document.body.appendChild(_savingBox);
 }
 
-function showSaving(text){
-  try{ createSavingPopup(); }catch(e){}
-  var o = document.getElementById('savingOverlay');
-  if(!o) return;
-  if(text) document.getElementById('saveMsgBig').innerHTML = text + '<br><b style="color:red">⚠️ Back Ya Refresh Mat Dabaiye</b><br><span style="font-size:12px;color:#888">Thora wait karein, 2-5 second lagenge</span>';
-  o.style.display = 'flex';
-  var prog = 10;
-  document.getElementById('saveProgress').style.width = '10%';
-  document.getElementById('savePercent').innerText = '10% Ho Gaya...';
-  clearInterval(skyProgTimer);
-  skyProgTimer = setInterval(function(){
-    prog += 10; if(prog > 90) prog = 90;
-    document.getElementById('saveProgress').style.width = prog + '%';
-    document.getElementById('savePercent').innerText = prog + '% Ho Gaya... Zara Rukiye';
-  }, 400);
-}
-
-function hideSaving(successMsg){
-  clearInterval(skyProgTimer);
-  var o = document.getElementById('savingOverlay');
-  if(!o) return;
-  if(successMsg){
-    document.getElementById('saveProgress').style.width = '100%';
-    document.getElementById('savePercent').innerText = '100% Ho Gaya! ✅';
-    document.getElementById('saveMsgBig').innerHTML = '✅ <b style="color:green;font-size:18px">' + successMsg + '</b><br>Ab aap wapis ja sakte hain.';
-    setTimeout(function(){
-      var oo = document.getElementById('savingOverlay');
-      if(oo) oo.style.display = 'none';
-      var pp = document.getElementById('saveProgress');
-      if(pp) pp.style.width = '0%';
-    }, 2000);
-  } else {
-    o.style.display = 'none';
-    document.getElementById('saveProgress').style.width = '0%';
-  }
+function hideSaving(msg){
+  playSound('done'); // ✅✅ Ho gaya wali awaz
+  if(_savingBox) _savingBox.remove();
+  _savingBox = document.createElement('div');
+  _savingBox.id = 'skySavingBox';
+  _savingBox.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;';
+  _savingBox.innerHTML = '<div style="background:#fff;padding:24px 20px;border-radius:18px;text-align:center;max-width:300px;width:90%;box-shadow:0 10px 30px rgba(0,0,0,0.3)"><div style="font-size:44px">✅</div><div style="font-size:16px;font-weight:700;margin:10px 0 4px">Ho Gaya!</div><div style="font-size:13px;color:#666">'+(msg||'Save Ho Gaya!')+'</div></div>';
+  document.body.appendChild(_savingBox);
+  setTimeout(()=>{ if(_savingBox){ _savingBox.remove(); _savingBox=null; } }, 1800);
 }
