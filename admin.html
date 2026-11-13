@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - SKY BAZAAR</title>
+<link rel="stylesheet" href="style9.css">
+<link rel="stylesheet" href="css.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="saving.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f1f5f9}
+.sky-head{background:#fff;padding:14px 14px 0;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px #0001}
+.sky-head-top{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:1100px;margin:0 auto}
+.sky-logo-img{width:58px;height:58px;border-radius:50%;border:3px solid #ffd700;object-fit:cover;background:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:#0a1a3d;overflow:hidden;flex-shrink:0}
+.sky-logo-img img{width:100%;height:100%;object-fit:cover}
+.sky-head-title{text-align:right;line-height:1}
+.sky-head-title b{font-size:28px;letter-spacing:0.5px}
+.sky-head-title b i{font-style:normal;color:#0a1a3d}
+.sky-head-title b span{color:#f5a800}
+.sky-tagline{font-size:11px;color:#f5a800;font-weight:800;margin-top:3px}
+.sky-nav{display:flex;gap:10px;overflow-x:auto;white-space:nowrap;padding:12px 0;max-width:1100px;margin:0 auto;scrollbar-width:none}
+.sky-nav::-webkit-scrollbar{display:none}
+.sky-nav a{color:#333;text-decoration:none;font-size:15px;font-weight:600;padding:9px 18px;border-radius:25px;flex-shrink:0}
+.sky-nav a.active{background:#0a1a3d;color:#fff;font-weight:800}
+.sec{max-width:1100px;margin:0 auto;padding:16px}
+.tab-row{display:flex;gap:8px;overflow-x:auto;padding:10px 0;scrollbar-width:none}
+.tab-row::-webkit-scrollbar{display:none}
+.tab-row button{padding:9px 16px;border:1px solid #ddd;border-radius:20px;background:#fff;white-space:nowrap;cursor:pointer;flex-shrink:0}
+.tab-row button.active{background:#0a1a3d;color:#fff}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:10px 0}
+.stat{background:#fff;padding:14px;border-radius:14px;text-align:center;box-shadow:0 2px 8px #0001}
+.stat h2{margin:4px 0}
+.card2{background:#fff;padding:12px;border-radius:14px;margin-bottom:10px;box-shadow:0 2px 8px #0001}
+.card2 img{width:70px;height:70px;object-fit:cover;border-radius:10px}
+.flex{display:flex;gap:10px;align-items:center}
+.hisab-box{background:#e8f5e9;border:1px solid #a5d6a7;padding:12px;border-radius:12px;margin-bottom:10px}
+.hisab-box2{background:#fff3e0;border:1px solid #ffcc80;padding:12px;border-radius:12px;margin-bottom:10px}
+.pass-box{background:#fff3cd;border:1px solid #ffc107;padding:14px;border-radius:12px;margin:12px 0}
+.form-box{background:#fff;padding:20px;border-radius:16px;max-width:420px;margin:30px auto;box-shadow:0 2px 10px #0001}
+.form-box input{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin-bottom:10px;outline:none}
+.btn{border:none;padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer}
+.btn-gold{background:#ffd700;color:#0a1a3d}
+@media(max-width:600px){.stat-row{grid-template-columns:1fr 1fr}.sky-head-title b{font-size:23px}.sky-logo-img{width:50px;height:50px}}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER - SKY BAZAAR ===== -->
+<div class="sky-head">
+  <div class="sky-head-top">
+    <a href="index.html"><div class="sky-logo-img"><img src="logo.png" onerror="this.style.display='none';this.parentElement.innerHTML='S ↗️'"></div></a>
+    <div class="sky-head-title"><b><i>SKY</i> <span>BAZAAR</span></b><div class="sky-tagline">✨ Jo Aayega Kamyab Hoga ✨</div></div>
+  </div>
+  <div class="sky-nav">
+    <a href="index.html">Home</a>
+    <a href="products.html">Products</a>
+    <a href="admin.html" class="active">Admin</a>
+    <a href="supplier.html">Supplier</a>
+    <a href="help.html">Help</a>
+    <a href="Account.html">My Account</a>
+  </div>
+</div>
+
+<div class="sec">
+<div id="loginBox" class="form-box">
+<h2>🔐 Admin Login</h2>
+<p style="font-size:13px;color:#666">Sirf Owner Login Kar Sakta Hai</p>
+<form id="loginForm">
+<input id="passInput" type="password" placeholder="Admin Password likho" required>
+<button class="btn btn-gold" style="width:100%">Admin Kholo →</button>
+<p id="loginMsg"></p>
+</form>
+<p style="font-size:12px;color:#888;text-align:center">Password bhool gaye? WhatsApp pe rabta karo: <b style="color:#0a1a3d">0311-0482356</b></p>
+<button onclick="secureReset()" style="background:none;border:none;color:#aaa;font-size:11px;cursor:pointer;width:100%;margin-top:4px">Owner Recovery (Secret Code)</button>
+</div>
+
+<div id="dashBox" style="display:none">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+<h2>👑 Admin Dashboard</h2>
+<div>
+<button class="btn" onclick="showChangePass()" style="background:#0a1a3d;color:#fff">🔑 Password Change Karo</button>
+<button class="btn" onclick="adminLogout()" style="background:#c00;color:#fff">Logout</button>
+</div>
+</div>
+
+<div id="changePassBox" class="pass-box" style="display:none">
+<h3>🔑 Password Change Karo</h3>
+<p style="font-size:12px;color:#666">Naya password: Kam se kam 8 harf, 1 BARA, 1 chota, 1 number - Ex: Sky@1234</p>
+<input id="oldPass" type="password" placeholder="Purana Password likho" style="margin-bottom:8px;width:100%;padding:11px;border-radius:10px;border:1px solid #ddd">
+<input id="newPass" type="password" placeholder="Naya Strong Password" style="margin-bottom:8px;width:100%;padding:11px;border-radius:10px;border:1px solid #ddd">
+<input id="newPass2" type="password" placeholder="Naya Password dobara likho" style="margin-bottom:8px;width:100%;padding:11px;border-radius:10px;border:1px solid #ddd">
+<button class="btn btn-gold" onclick="changePassword()" style="width:100%">✅ Password Change Karo</button>
+<button onclick="document.getElementById('changePassBox').style.display='none'" style="width:100%;margin-top:8px;padding:10px;border:none;background:#eee;border-radius:10px">Cancel</button>
+<p id="changeMsg"></p>
+</div>
+
+<div class="stat-row">
+<div class="stat"><span>Total Orders</span><h2 id="cOrders">0</h2></div>
+<div class="stat"><span>Pending Products</span><h2 id="cPending" style="color:orange">0</h2></div>
+<div class="stat"><span>Approved Products</span><h2 id="cApproved" style="color:green">0</h2></div>
+</div>
+<div class="stat-row">
+<div class="stat"><span>Pending Withdraw</span><h2 id="cWithdraw" style="color:#e67e22">0</h2></div>
+<div class="stat"><span>Return Requests</span><h2 id="cReturns" style="color:red">0</h2></div>
+<div class="stat"><span>Supplier Ko Dena Hai</span><h2 id="cSupPay" style="color:red">Rs. 0</h2></div>
+</div>
+<div class="stat-row">
+<div class="stat"><span>Reseller Ko Dena Hai</span><h2 id="cResPay" style="color:red">Rs. 0</h2></div>
+<div class="stat"><span>Sky Profit (Delivered)</span><h2 id="cProfit" style="color:green">Rs. 0</h2></div>
+<div class="stat"><span>Total Dena Hai</span><h2 id="cTotalPay" style="color:#0a1a3d">Rs. 0</h2></div>
+</div>
+
+<div class="tab-row">
+<button onclick="setTab('hisab',this)" style="background:#0a7a42;color:#fff;font-weight:700">💰 Hisab</button>
+<button class="active" onclick="setTab('orders',this)">📦 Orders</button>
+<button onclick="setTab('pending',this)">⏳ Pending Products</button>
+<button onclick="setTab('approved',this)">✅ Approved Products</button>
+<button onclick="setTab('withdraw',this)">💸 Withdraw</button>
+<button onclick="setTab('returns',this)">↩️ Returns</button>
+<button onclick="setTab('resellers',this)">👥 Resellers</button>
+<button onclick="setTab('suppliers',this)">🏭 Suppliers</button>
+<button onclick="setTab('newsletter',this)">📩 Offers</button>
+<button onclick="setTab('help',this)">🆘 Help Msgs</button>
+</div>
+<div id="content">Loading...</div>
+</div>
+</div>
+
+<footer style="text-align:center;padding:20px;background:#0a1a3d;color:#fff;margin-top:20px"><h3 style="margin:0;color:#ffd700">SKY BAZAAR</h3><p style="margin:6px 0 0;color:#cbd5e1">✨ Jo Aayega Kamyab Hoga ✨<br>support@skybazaar.pakistan@gmail.com • 0311-0482356</p></footer>
+
+<script>
+let allOrders=[], allProducts=[], allResellers=[], allSuppliers=[], allWithdraw=[], allReturns=[], allNews=[], allHelp=[];
+let activeTab='orders';
+
+// ✅ TUMHARA PASSWORD - Dkb9828&
+function getAdminPass(){ return localStorage.getItem('sky_admin_pass') || 'Dkb9828&'; }
+function isStrong(p){
+  if(p.length < 8) return 'Password kam se kam 8 harf ka hona chahiye';
+  if(!/[A-Z]/.test(p)) return '1 BARA harf (A-Z) zaroori hai';
+  if(!/[a-z]/.test(p)) return '1 chota harf (a-z) zaroori hai';
+  if(!/[0-9]/.test(p)) return '1 number (0-9) zaroori hai';
+  return '';
+}
+function showChangePass(){
+  document.getElementById('changePassBox').style.display='block';
+  document.getElementById('changeMsg').innerText='';
+}
+function changePassword(){
+  let oldP = document.getElementById('oldPass').value;
+  let newP = document.getElementById('newPass').value;
+  let newP2 = document.getElementById('newPass2').value;
+  let msg = document.getElementById('changeMsg');
+  if(oldP !== getAdminPass()){ msg.innerText='❌ Purana Password galat hai'; return; }
+  if(newP !== newP2){ msg.innerText='❌ Dono naye password same nahi hain'; return; }
+  if(newP === oldP){ msg.innerText='❌ Naya password purane se alag rakho'; return; }
+  let e = isStrong(newP);
+  if(e){ msg.innerText='❌ ' + e; return; }
+  try{ showSaving('Password Change Ho Raha Hai...'); }catch(e2){}
+  localStorage.setItem('sky_admin_pass', newP);
+  msg.innerText='✅ Password Change ho gaya!';
+  try{ hideSaving('Ho Gaya! Password Change Ho Gaya!'); }catch(e2){}
+  alert('✅ Password Change ho gaya! Naya password: ' + newP);
+  document.getElementById('oldPass').value=''; document.getElementById('newPass').value=''; document.getElementById('newPass2').value='';
+}
+function adminLogout(){ localStorage.removeItem('sky_admin_login'); location.reload(); }
+
+// ✅ SECURE RESET - Sirf Secret Code se, ?reset=1 se nahi
+function secureReset(){
+  let code = prompt('🔐 Owner Recovery Code likho (Sirf Owner ko pata hai):');
+  if(!code) return;
+  if(code === 'SKY-OWNER-0311'){
+    localStorage.removeItem('sky_admin_pass');
+    localStorage.removeItem('sky_admin_login');
+    alert('✅ Password Reset ho gaya! Ab password hai: Dkb9828&\nAb foran Login karke naya password laga lo.');
+    location.reload();
+  } else {
+    alert('❌ Galat Secret Code! Tum Owner nahi ho.');
+  }
+}
+
+window.onload = function(){
+  // ❌ PURANA reset=1 WALA CODE DELETE KAR DIYA - Ab koi reset nahi kar sakta
+  if(localStorage.getItem('sky_admin_login')=='yes'){
+    document.getElementById('loginBox').style.display='none';
+    document.getElementById('dashBox').style.display='block';
+    loadAll();
+  }
+};
+
+document.getElementById('loginForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  let p = document.getElementById('passInput').value;
+  if(p === getAdminPass()){
+    try{ showSaving('Admin Login Ho Raha Hai...'); }catch(e2){}
+    localStorage.setItem('sky_admin_login','yes');
+    document.getElementById('loginBox').style.display='none';
+    document.getElementById('dashBox').style.display='block';
+    try{ hideSaving('Ho Gaya! Admin Khul Gaya!'); }catch(e2){}
+    loadAll();
+  } else {
+    document.getElementById('loginMsg').innerText='❌ Password galat hai';
+  }
+});
+
+function setTab(t, btn){
+  activeTab=t;
+  document.querySelectorAll('.tab-row button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  render();
+}
+function calcHisab(){
+  let delivered = allOrders.filter(o=>o.status=='Delivered');
+  let supMap = {}, resMap = {};
+  delivered.forEach(o=>{
+    let sName = o.supplier || o.supplierName || o.shop || 'Unknown Supplier';
+    let sPhone = o.supplierPhone || o.supplierWhatsapp || '';
+    if(!supMap[sName]) supMap[sName]={name:sName, phone:sPhone, count:0, total:0, paid:0};
+    let sAmt = Number(o.supplierPrice||o.supplierRate||0);
+    supMap[sName].count++; supMap[sName].total+=sAmt;
+    if(o.supplierPaid) supMap[sName].paid+=sAmt;
+    let rName = o.reseller || o.resellerName || 'Direct / No Reseller';
+    let rPhone = o.resellerPhone || o.resellerWhatsapp || o.resellerWa || '';
+    if(!resMap[rName]) resMap[rName]={name:rName, phone:rPhone, count:0, total:0, paid:0};
+    let rAmt = Number(o.profit||o.resellerProfit||o.resellerAmount||0);
+    resMap[rName].count++; resMap[rName].total+=rAmt;
+    if(o.resellerPaid) resMap[rName].paid+=rAmt;
+  });
+  return {sup:Object.values(supMap), res:Object.values(resMap)};
+}
+function render(){
+  let box = document.getElementById('content');
+  if(activeTab=='hisab'){
+    let h = calcHisab();
+    let html = '<h3>🏭 Supplier Ko Kitna Dena Hai?</h3>';
+    if(!h.sup.length) html+='<p style="background:#fff;padding:14px;border-radius:12px">Abhi koi Delivered order nahi hai.</p>';
+    else html+=h.sup.map(s=>{
+      let baaki = s.total - s.paid;
+      return '<div class="hisab-box"><b>'+s.name+'</b> '+s.phone+'<br>Orders: <b>'+s.count+'</b><br>Total: <b>Rs. '+s.total+'</b> | De Diya: <b style="color:green">Rs. '+s.paid+'</b> | <b style="color:red">Baaki: Rs. '+baaki+'</b><br>'+(baaki>0 ? '<button onclick="paySupplier(\''+s.name.replace(/'/g,"")+'\')" style="background:#0a7a42;color:#fff;border:none;padding:9px 14px;border-radius:8px;margin-top:8px;font-weight:700">✅ Rs. '+baaki+' De Diya - Paid Kar Do</button>' : '<span style="color:green;font-weight:700">✅ Sab Clear Hai</span>')+'</div>';
+    }).join('');
+    html+='<h3 style="margin-top:20px">👥 Reseller Ko Kitna Dena Hai?</h3>';
+    if(!h.res.length) html+='<p style="background:#fff;padding:14px;border-radius:12px">Abhi koi Reseller profit nahi hai.</p>';
+    else html+=h.res.map(r=>{
+      let baaki = r.total - r.paid;
+      return '<div class="hisab-box2"><b>'+r.name+'</b> '+r.phone+'<br>Orders: <b>'+r.count+'</b><br>Total Profit: <b>Rs. '+r.total+'</b> | De Diya: <b style="color:green">Rs. '+r.paid+'</b> | <b style="color:red">Baaki: Rs. '+baaki+'</b><br>'+(baaki>0 ? '<button onclick="payReseller(\''+r.name.replace(/'/g,"")+'\')" style="background:#e67e22;color:#fff;border:none;padding:9px 14px;border-radius:8px;margin-top:8px;font-weight:700">✅ Rs. '+baaki+' De Diya - Paid Kar Do</button>' : '<span style="color:green;font-weight:700">✅ Sab Clear Hai</span>')+'</div>';
+    }).join('');
+    box.innerHTML = html; return;
+  }
+  if(activeTab=='orders'){
+    if(allOrders.length==0) box.innerHTML='<p style="text-align:center;padding:20px;background:#fff;border-radius:12px">Abhi koi order nahi aaya.</p>';
+    else box.innerHTML = allOrders.map(o=>'<div class="card2"><b>'+(o.product||'Product')+'</b> <span style="float:right;color:'+(o.status=='Delivered'?'green':'orange')+'">'+(o.status||'Pending')+'</span><br><span style="font-size:12px;color:#666">Order ID: '+(o.orderId||o.id)+' • '+(o.date||'')+'</span><br><span style="font-size:13px">Customer: <b>'+(o.customer||'')+'</b> - '+(o.phone||'')+'</span><br><span style="font-size:12px">Address: '+(o.address||'')+' - '+(o.city||'')+'</span><br><span style="font-size:12px">Reseller: '+(o.reseller||'')+' | Supplier: '+(o.supplier||'')+'</span><br><span style="font-size:13px">Becha: Rs. '+(o.sellPrice||o.price||0)+' | Supplier: Rs. '+(o.supplierPrice||0)+' | <b style="color:green">Profit: Rs. '+(o.profit||o.resellerProfit||0)+'</b></span><br><span style="font-size:12px">Supplier Paid: '+(o.supplierPaid?'✅ Haan':'❌ Nahi')+' | Reseller Paid: '+(o.resellerPaid?'✅ Haan':'❌ Nahi')+'</span><br><div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><button onclick="changeStatus(\''+o.docId+'\',\'Delivered\')" style="background:green;color:#fff;border:none;padding:7px 12px;border-radius:8px">✅ Delivered</button><button onclick="changeStatus(\''+o.docId+'\',\'Pending\')" style="background:orange;color:#fff;border:none;padding:7px 12px;border-radius:8px">⏳ Pending</button><button onclick="changeStatus(\''+o.docId+'\',\'Cancelled\')" style="background:red;color:#fff;border:none;padding:7px 12px;border-radius:8px">❌ Cancel</button></div></div>').join('');
+  }
+  if(activeTab=='pending'){
+    let list = allProducts.filter(p=>p.status=='Pending' || !p.status);
+    if(list.length==0) box.innerHTML='<p style="text-align:center;padding:20px;background:#fff;border-radius:12px">Koi Pending Product nahi hai.</p>';
+    else box.innerHTML = list.map(p=>'<div class="card2"><div class="flex"><img src="'+(p.img||p.image||'')+'" onerror="this.src=\'https://via.placeholder.com/70x70?text=SKY\'"><div><b>'+p.name+'</b><br><span style="font-size:12px">Supplier Rate: Rs. '+(p.price||p.supplierPrice||0)+' | By: '+(p.supplierName||p.supplier||p.shop||'Supplier')+'</span><br><span style="font-size:12px;color:#666">'+(p.description||p.desc||'')+' • '+(p.category||'')+' • Stock: '+(p.stock||'')+'</span></div></div><div style="display:flex;gap:6px;margin-top:8px"><button onclick="approveProduct(\''+p.docId+'\')" style="background:green;color:#fff;border:none;padding:7px 12px;border-radius:8px">✅ Approve</button><button onclick="rejectProduct(\''+p.docId+'\')" style="background:red;color:#fff;border:none;padding:7px 12px;border-radius:8px">❌ Reject / Delete</button></div></div>').join('');
+  }
+  if(activeTab=='approved'){
+    let list = allProducts.filter(p=>p.status=='Approved');
+    if(list.length==0) box.innerHTML='<p style="text-align:center;padding:20px;background:#fff;border-radius:12px">Koi Approved Product nahi hai.</p>';
+    else box.innerHTML = list.map(p=>'<div class="card2"><div class="flex"><img src="'+(p.img||p.image||'')+'" onerror="this.src=\'https://via.placeholder.com/70x70?text=SKY\'"><div><b>'+p.name+'</b><br>Rs. '+(p.price||p.supplierPrice||0)+' - '+(p.status||'')+' • By: '+(p.supplierName||p.supplier||'')+'<br><span style="font-size:12px;color:#666">'+(p.description||p.desc||'')+' • Stock: '+(p.stock||'')+'</span></div></div><div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><button onclick="unapproveProduct(\''+p.docId+'\')" style="background:orange;color:#fff;border:none;padding:7px 12px;border-radius:8px">⏸ Unapprove</button><button onclick="deleteProduct(\''+p.docId+'\')" style="background:red;color:#fff;border:none;padding:7px 12px;border-radius:8px">🗑 Delete</button></div></div>').join('');
+  }
+  if(activeTab=='withdraw'){
+    if(allWithdraw.length==0) box.innerHTML='<p style="text-align:center;padding:20px;background:#fff;border-radius:12px">Koi Withdraw Request nahi hai.</p>';
+    else box.innerHTML = allWithdraw.map(w=>'<div class="card2"><b>'+(w.name||w.reseller||'')+'</b> - Rs. '+(w.amount||0)+' - '+(w.method||'')+'<br><span style="font-size:12px">Account: '+(w.number||w.account||'')+' • '+(w.date||'')+' • <b>'+(w.status||'Pending')+'</b></span><br><div style="display:flex;gap:6px;margin-top:8px"><button onclick="changeWithdraw(\''+w.docId+'\',\'Paid\')" style="background:green;color:#fff;border:none;padding:7px 12px;border-radius:8px">✅ Paid Kar Diya</button><button onclick="changeWithdraw(\''+w.docId+'\',\'Rejected\')" style="background:red;color:#fff;border:none;padding:7px 12px;border-radius:8px">❌ Reject</button></div></div>').join('');
+  }
+  if(activeTab=='returns'){
+    if(allReturns.length==0) box.innerHTML='<p style="text-align:center;padding:20px;background:#fff;border-radius:12px">Koi Return Request nahi hai.</p>';
+    else box.innerHTML = allReturns.map(r=>'<div class="card2"><b>'+(r.orderId||'')+'</b> - '+(r.product||'')+' - Rs. '+(r.price||0)+'<br><span style="font-size:12px">Phone: '+(r.phone||'')+' • Reason: '+(r.reason||'')+' '+(r.detail||'')+'</span><br><b>'+(r.status||'Return Request')+'</b><br><div style="display:flex;gap:6px;margin-top:8px"><button onclick="changeReturn(\''+r.docId+'\',\'Returned\')" style="background:green;color:#fff;border:none;padding:7px 12px;border-radius:8px">✅ Returned</button><button onclick="changeReturn(\''+r.docId+'\',\'Return Rejected\')" style="background:red;color:#fff;border:none;padding:7px 12px;border-radius:8px">❌ Reject</button></div></div>').join('');
+  }
+  if(activeTab=='resellers'){
+    if(allResellers.length==0) box.innerHTML='<p style="text-align:center;padding:20px;background:#fff;border-radius:12px">Abhi koi Reseller nahi aaya.</p>';
+    else box.innerHTML = allResellers.map(r=>'<div class="card2"><b>'+(r.name||r.reseller||'')+'</b><br>'+(r.phone||r.whatsapp||'')+' - '+(r.city||'')+'</div>').join('');
+  }
+  if(activeTab=='suppliers'){
+    if(allSuppliers.length==0) box.innerHTML='<p style="text-align:center;padding:20px;background:#fff;border-radius:12px">Abhi koi Supplier nahi aaya.</p>';
+    else box.innerHTML = allSuppliers.map(s=>'<div class="card2"><b>'+(s.shop||s.shopName||s.supplierName||s.name||'')+'</b><br>'+(s.phone||s.whatsapp||'')+' - '+(s.city||'')+' - '+(s.category||'')+'</div>').join('');
+  }
+  if(activeTab=='newsletter'){
+    if(allNews.length==0) box.innerHTML='<p style="text-align:center;padding:20px;background:#fff;border-radius:12px">Abhi koi Offer wala number nahi aaya.</p>';
+    else box.innerHTML = allNews.map(n=>{
+      let clean = String(n.number||'').replace(/[^0-9]/g,'').slice(-10);
+      return '<div class="card2"><b>📞 '+n.number+'</b> <span style="font-size:12px;color:#666"> - '+(n.time||'')+'</span><br><a href="https://wa.me/92'+clean+'" target="_blank" style="display:inline-block;background:#25D366;color:#fff;padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:700;margin-top:6px">💬 WhatsApp Karo</a></div>';
+    }).join('');
+  }
+  if(activeTab=='help'){
+    if(allHelp.length==0) box.innerHTML='<p style="text-align:center;padding:20px;background:#fff;border-radius:12px">Koi Help Message nahi aaya.</p>';
+    else box.innerHTML = allHelp.map(h=>{
+      let clean = String(h.number||'').replace(/[^0-9]/g,'').slice(-10);
+      return '<div class="card2"><b>'+h.name+'</b> - '+h.number+' - <b>'+h.topic+'</b><br><span style="font-size:13px">'+h.message+'</span><br><span style="font-size:12px;color:#666">'+(h.time||'')+'</span><br><a href="https://wa.me/92'+clean+'" target="_blank" style="display:inline-block;background:#25D366;color:#fff;padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:700;margin-top:6px">💬 Jawab Do</a></div>';
+    }).join('');
+  }
+}
+async function loadAll(){
+  document.getElementById('content').innerHTML='Loading...';
+  allOrders=[]; allProducts=[]; allResellers=[]; allSuppliers=[]; allWithdraw=[]; allReturns=[]; allNews=[]; allHelp=[];
+  try{ let s=await db.collection('sky_orders').orderBy('createdAt','desc').get(); s.forEach(d=>{let o=d.data(); o.docId=d.id; o.orderId=o.id; allOrders.push(o);}); }catch(e){}
+  try{ let s=await db.collection('sky_products').orderBy('createdAt','desc').get(); s.forEach(d=>{let p=d.data(); p.docId=d.id; allProducts.push(p);}); }catch(e){}
+  try{ let s=await db.collection('sky_resellers').get(); s.forEach(d=>{let r=d.data(); r.docId=d.id; allResellers.push(r);}); }catch(e){}
+  try{ let s=await db.collection('sky_suppliers').get(); s.forEach(d=>{let s2=d.data(); s2.docId=d.id; allSuppliers.push(s2);}); }catch(e){}
+  try{ let s=await db.collection('sky_withdraw').orderBy('createdAt','desc').get(); s.forEach(d=>{let w=d.data(); w.docId=d.id; allWithdraw.push(w);}); }catch(e){}
+  try{ let s=await db.collection('sky_returns').orderBy('createdAt','desc').get(); s.forEach(d=>{let r=d.data(); r.docId=d.id; allReturns.push(r);}); }catch(e){}
+  try{ let s=await db.collection('newsletter').orderBy('time','desc').limit(50).get(); s.forEach(d=>{let n=d.data(); n.docId=d.id; allNews.push(n);}); }catch(e){}
+  try{ let s=await db.collection('help_messages').orderBy('time','desc').limit(50).get(); s.forEach(d=>{let h=d.data(); h.docId=d.id; allHelp.push(h);}); }catch(e){}
+  if(allReturns.length==0){
+    allReturns = allOrders.filter(o=>o.status=='Return Request'||o.status=='Returned').map(o=>({docId:o.docId, orderId:o.orderId, product:o.product, price:o.sellPrice||o.price||0, phone:o.returnPhone||o.phone, reason:o.returnReason||'', status:o.status}));
+  }
+  let h = calcHisab();
+  let supBaaki = h.sup.reduce((s,x)=>s+(x.total-x.paid),0);
+  let resBaaki = h.res.reduce((s,x)=>s+(x.total-x.paid),0);
+  document.getElementById('cOrders').innerText = allOrders.length;
+  document.getElementById('cPending').innerText = allProducts.filter(p=>p.status=='Pending'||!p.status).length;
+  document.getElementById('cApproved').innerText = allProducts.filter(p=>p.status=='Approved').length;
+  document.getElementById('cWithdraw').innerText = allWithdraw.filter(w=>w.status=='Pending').length;
+  document.getElementById('cReturns').innerText = allReturns.filter(r=>r.status=='Return Request').length;
+  document.getElementById('cSupPay').innerText = 'Rs. ' + supBaaki;
+  document.getElementById('cResPay').innerText = 'Rs. ' + resBaaki;
+  let totalProfit = allOrders.filter(o=>o.status=='Delivered').reduce((s,o)=>s+Number(o.profit||o.resellerProfit||0),0);
+  document.getElementById('cProfit').innerText = 'Rs. ' + totalProfit;
+  document.getElementById('cTotalPay').innerText = 'Rs. ' + (supBaaki + resBaaki);
+  render();
+}
+async function changeStatus(docId, newStatus){
+  if(!confirm('Kya aap is order ko ' + newStatus + ' karna chahte ho?')) return;
+  try{ showSaving('Status Change Ho Raha Hai...'); }catch(e){}
+  try{
+    await db.collection('sky_orders').doc(docId).update({status:newStatus, updatedAt:new Date().toLocaleString('en-PK')});
+    try{ hideSaving('Ho Gaya! Status ' + newStatus + ' Ho Gaya!'); }catch(e){}
+    alert('✅ Order ' + newStatus + ' ho gaya!' + (newStatus=='Delivered' ? '\nAb Reseller ko iski Earning mil jayegi.' : '\nIski Earning abhi nahi milegi.'));
+    loadAll();
+  }catch(e){ alert('❌ Error: ' + e.message); }
+}
+async function paySupplier(name){
+  if(!confirm(name + ' ko poora paisa de diya?')) return;
+  let list = allOrders.filter(o=>(o.supplier||o.supplierName||o.shop||'Unknown Supplier')==name && o.status=='Delivered' && !o.supplierPaid);
+  for(let o of list){ await db.collection('sky_orders').doc(o.docId).update({supplierPaid:true}); }
+  alert('✅ Supplier Paid Kar Diya!');
+  loadAll();
+}
+async function payReseller(name){
+  if(!confirm(name + ' ko poora profit de diya?')) return;
+  let list = allOrders.filter(o=>(o.reseller||o.resellerName||'Direct / No Reseller')==name && o.status=='Delivered' && !o.resellerPaid);
+  for(let o of list){ await db.collection('sky_orders').doc(o.docId).update({resellerPaid:true}); }
+  alert('✅ Reseller Paid Kar Diya!');
+  loadAll();
+}
+async function approveProduct(id){ await db.collection('sky_products').doc(id).update({status:'Approved'}); alert('✅ Product Approved!'); loadAll(); }
+async function rejectProduct(id){ if(!confirm('Delete karein?')) return; await db.collection('sky_products').doc(id).delete(); alert('🗑 Delete ho gaya!'); loadAll(); }
+async function unapproveProduct(id){ await db.collection('sky_products').doc(id).update({status:'Pending'}); loadAll(); }
+async function deleteProduct(id){ if(!confirm('Delete karein?')) return; await db.collection('sky_products').doc(id).delete(); loadAll(); }
+async function changeWithdraw(id, st){ await db.collection('sky_withdraw').doc(id).update({status:st}); alert('✅ Withdraw ' + st); loadAll(); }
+async function changeReturn(id, st){ await db.collection('sky_returns').doc(id).update({status:st}); alert('✅ Return ' + st); loadAll(); }
+</script>
+</body>
+</html>
