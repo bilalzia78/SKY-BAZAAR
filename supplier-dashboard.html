@@ -2,6 +2,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="saving.js"></script>
 <style>
 .stat{background:#0a1a3d;color:#fff;border-radius:16px;padding:16px;text-align:center;margin-bottom:12px}
 .stat.green{background:#0a7a42}.stat.orange{background:#e67e22}.stat.gold{background:#eab308;color:#000}
@@ -71,11 +72,11 @@ document.getElementById('loginForm').addEventListener('submit', async e=>{
   e.preventDefault();
   let shop = document.getElementById('shopInput').value.trim();
   let wa = cleanWa(document.getElementById('waInput').value);
+  try{ showSaving('Aapka Account Check Ho Raha Hai...'); }catch(e2){}
   document.getElementById('loginMsg').innerText='Check kar rahe hain...';
 
   try{
     let found = false;
-    // ✅ FIX 1: Pehle sky_suppliers me check karo - jahan Form bhara tha
     try{
       let sSnap = await db.collection('sky_suppliers').get();
       sSnap.forEach(d=>{
@@ -84,7 +85,6 @@ document.getElementById('loginForm').addEventListener('submit', async e=>{
       });
     }catch(err){ console.log('suppliers check',err); }
 
-    // ✅ FIX 2: Agar suppliers me nahi mila to products me bhi check karo
     if(!found){
       let snap = await db.collection('sky_products').get();
       snap.forEach(d=>{
@@ -93,13 +93,14 @@ document.getElementById('loginForm').addEventListener('submit', async e=>{
       });
     }
 
-    if(!found){ document.getElementById('loginMsg').innerText='❌ Galat Shop Name ya WhatsApp Number! Dono wahi likho jo Supplier Form me likha tha.'; return; }
+    if(!found){ try{ hideSaving(); }catch(e2){} document.getElementById('loginMsg').innerText='❌ Galat Shop Name ya WhatsApp Number! Dono wahi likho jo Supplier Form me likha tha.'; return; }
 
     myShop=shop; myWa=wa;
     localStorage.setItem('sky_supplier_shop', shop);
     localStorage.setItem('sky_supplier_wa', wa);
+    try{ hideSaving('Ho Gaya! Account Khul Gaya!'); }catch(e2){}
     openDashboard();
-  }catch(err){ document.getElementById('loginMsg').innerText='❌ Error - Firebase check karo'; console.log(err); }
+  }catch(err){ try{ hideSaving(); }catch(e2){} document.getElementById('loginMsg').innerText='❌ Error - Firebase check karo'; console.log(err); }
 });
 
 function openDashboard(){
@@ -114,11 +115,9 @@ async function loadData(){
     let snap = await db.collection('sky_products').get();
     let myProds=[];
     snap.forEach(d=>{ let p=d.data(); p.docId=d.id; 
-      // ✅ Shop naam se match karo - chahe field ka naam kuch bhi ho
       if(getShopName(p).toLowerCase()==myShop.toLowerCase() && waMatch(getWa(p), myWa)) myProds.push(p);
     });
 
-    // ✅ FIX: price ya supplierPrice jo bhi ho
     document.getElementById('myProducts').innerHTML = myProds.map(p=>{
       let price = p.price || p.supplierPrice || 0;
       let stock = p.stock ?? p.quantity ?? '—';
@@ -132,7 +131,6 @@ async function loadData(){
 
     let done = myOrders.filter(o=>o.status=='Delivered'||o.status=='Done').length;
     let pending = myOrders.filter(o=>o.status=='Pending').length;
-    // ✅ FIX: Quantity se guna karo, -100 se bacho
     let totalPaisa = myOrders.filter(o=>o.status=='Delivered'||o.status=='Done').reduce((s,o)=>{
       let base = Number(o.supplierPrice||0) * Number(o.quantity||1);
       return s + Math.max(0, base - 100);
