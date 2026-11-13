@@ -86,9 +86,11 @@ document.getElementById('orderForm').addEventListener('submit', async e=>{
     status: 'Pending',
     createdAt: Date.now(), date: new Date().toLocaleString()
   };
+  try{ showSaving('Aapka Order Save Ho Raha Hai...'); }catch(e2){}
   document.getElementById('msg').innerText = 'Saving order...';
   try{ await db.collection('sky_orders').add(order); }catch(err){ alert('Firebase me save nahi hua, config check karo'); return; }
   let list = JSON.parse(localStorage.getItem('orders')||'[]'); list.push({...order, name:order.product, total:order.sellPrice, profit:order.profit}); localStorage.setItem('orders', JSON.stringify(list));
+  try{ hideSaving('Ho Gaya! Order Save Ho Gaya!'); }catch(e2){}
   document.getElementById('msg').innerText = '✅ Order Saved! ID: '+orderId+' - Aapka Profit: Rs. '+profit;
   setTimeout(()=>location.href='Account.html',1200);
 });
