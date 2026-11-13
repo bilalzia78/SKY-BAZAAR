@@ -9,6 +9,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="saving.js"></script>
 <style>
 .tab-row{display:flex;gap:8px;overflow-x:auto;padding:10px 0}
 .tab-row button{padding:9px 16px;border:1px solid #ddd;border-radius:20px;background:#fff;white-space:nowrap;cursor:pointer}
@@ -118,8 +119,10 @@ function changePassword(){
   if(newP === oldP){ msg.innerText='❌ Naya password purane se alag rakho'; return; }
   let e = isStrong(newP);
   if(e){ msg.innerText='❌ ' + e; return; }
+  try{ showSaving('Password Change Ho Raha Hai...'); }catch(e2){}
   localStorage.setItem('sky_admin_pass', newP);
   msg.innerText='✅ Password Change ho gaya!';
+  try{ hideSaving('Ho Gaya! Password Change Ho Gaya!'); }catch(e2){}
   alert('✅ Password Change ho gaya! Naya password: ' + newP);
   document.getElementById('oldPass').value=''; document.getElementById('newPass').value=''; document.getElementById('newPass2').value='';
 }
@@ -145,9 +148,11 @@ document.getElementById('loginForm').addEventListener('submit', function(e){
   e.preventDefault();
   let p = document.getElementById('passInput').value;
   if(p === getAdminPass()){
+    try{ showSaving('Admin Login Ho Raha Hai...'); }catch(e2){}
     localStorage.setItem('sky_admin_login','yes');
     document.getElementById('loginBox').style.display='none';
     document.getElementById('dashBox').style.display='block';
+    try{ hideSaving('Ho Gaya! Admin Khul Gaya!'); }catch(e2){}
     loadAll();
   } else {
     document.getElementById('loginMsg').innerText='❌ Password galat hai - Sahi hai: sky123 (s chota)';
@@ -252,38 +257,4 @@ async function loadAll(){
   document.getElementById('cResPay').innerText = 'Rs. ' + resBaaki;
   let totalProfit = allOrders.filter(o=>o.status=='Delivered').reduce((s,o)=>s+Number(o.profit||o.resellerProfit||0),0);
   document.getElementById('cProfit').innerText = 'Rs. ' + totalProfit;
-  document.getElementById('cTotalPay').innerText = 'Rs. ' + (supBaaki + resBaaki);
-  render();
-}
-async function changeStatus(docId, status){ await db.collection('sky_orders').doc(docId).update({status:status}); alert('✅ Order '+status+' kar diya'); loadAll(); }
-async function approveProduct(docId){
-  let p = allProducts.find(x=>x.docId==docId);
-  let price = p ? (p.price||p.supplierPrice||0) : 0;
-  await db.collection('sky_products').doc(docId).update({status:'Approved', price:price, supplierPrice:price});
-  alert('✅ Product Approve ho gaya'); loadAll();
-}
-async function rejectProduct(docId){ if(!confirm('Reject karna hai? Product delete ho jayega.')) return; await db.collection('sky_products').doc(docId).delete(); loadAll(); }
-async function unapproveProduct(docId){ await db.collection('sky_products').doc(docId).update({status:'Pending'}); alert('⏸ Product wapis Pending me chala gaya'); loadAll(); }
-async function deleteProduct(docId){ if(!confirm('Pakka Delete karna hai?')) return; await db.collection('sky_products').doc(docId).delete(); alert('🗑 Product Delete ho gaya'); loadAll(); }
-async function changeWithdraw(docId, status){ await db.collection('sky_withdraw').doc(docId).update({status:status}); alert('✅ Withdraw '+status); loadAll(); }
-async function changeReturn(docId, status){
-  try{ await db.collection('sky_returns').doc(docId).update({status:status}); }catch(e){}
-  let r = allReturns.find(x=>x.docId==docId);
-  if(r && r.orderId){ try{ let snap = await db.collection('sky_orders').where('id','==',r.orderId).get(); snap.forEach(d=>d.ref.update({status:status})); }catch(e){} }
-  alert('✅ Return '+status); loadAll();
-}
-async function paySupplier(name){
-  if(!confirm(name + ' ko poora baaki paisa de diya?')) return;
-  let list = allOrders.filter(o=>(o.supplier||o.supplierName||o.shop)==name && o.status=='Delivered' && !o.supplierPaid);
-  for(let o of list){ await db.collection('sky_orders').doc(o.docId).update({supplierPaid:true}); }
-  alert('✅ Supplier Paid - Hisab Clear'); loadAll();
-}
-async function payReseller(name){
-  if(!confirm(name + ' ko poora profit de diya?')) return;
-  let list = allOrders.filter(o=>(o.reseller||o.resellerName)==name && o.status=='Delivered' && !o.resellerPaid);
-  for(let o of list){ await db.collection('sky_orders').doc(o.docId).update({resellerPaid:true}); }
-  alert('✅ Reseller Paid - Hisab Clear'); loadAll();
-}
-</script>
-</body>
-</html>
+  document.getElementById('c
