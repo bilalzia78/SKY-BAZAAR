@@ -1,0 +1,120 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>My Account - SKY SHOPPING</title><link rel="stylesheet" href="style9.css"><link rel="stylesheet" href="css.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f1f5f9}
+.sky-head{background:#fff;padding:14px 14px 0;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px #0001}
+.sky-head-top{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:1100px;margin:0 auto}
+.sky-logo-img{width:58px;height:58px;border-radius:50%;border:3px solid #ffd700;object-fit:cover;background:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:#0a1a3d;overflow:hidden;flex-shrink:0}
+.sky-logo-img img{width:100%;height:100%;object-fit:cover}
+.sky-head-title{text-align:right;line-height:1}
+.sky-head-title b{font-size:28px;letter-spacing:0.5px}
+.sky-head-title b i{font-style:normal;color:#0a1a3d}
+.sky-head-title b span{color:#f5a800}
+.sky-tagline{font-size:11px;color:#f5a800;font-weight:800;margin-top:3px}
+.sky-nav{display:flex;gap:10px;overflow-x:auto;white-space:nowrap;padding:12px 0;max-width:1100px;margin:0 auto;scrollbar-width:none}
+.sky-nav::-webkit-scrollbar{display:none}
+.sky-nav a{color:#333;text-decoration:none;font-size:15px;font-weight:600;padding:9px 18px;border-radius:25px;flex-shrink:0}
+.sky-nav a.active{background:#0a1a3d;color:#fff;font-weight:800}
+.sec{max-width:1100px;margin:0 auto;padding:16px}
+.stat{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.stat>div{background:#fff;padding:16px;border-radius:14px;text-align:center;box-shadow:0 2px 8px #0001}
+.stat b{font-size:20px;display:block;margin-top:4px}
+.card{background:#fff;border-radius:16px;box-shadow:0 2px 8px #0001}
+.pad{padding:18px}
+.btn{border:none;padding:12px 18px;border-radius:10px;font-weight:800;cursor:pointer}
+.btn-gold{background:#ffd700;color:#0a1a3d}
+@media(max-width:600px){.stat{grid-template-columns:1fr}.sky-head-title b{font-size:23px}.sky-logo-img{width:50px;height:50px}}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER - BILKUL SCREENSHOT WALA ===== -->
+<div class="sky-head">
+  <div class="sky-head-top">
+    <a href="index.html"><div class="sky-logo-img"><img src="logo.png" onerror="this.style.display='none';this.parentElement.innerHTML='S ↗️'"></div></a>
+    <div class="sky-head-title"><b><i>SKY</i> <span>SHOPPING</span></b><div class="sky-tagline">✨ Jo Aayega Kamyab Hoga ✨</div></div>
+  </div>
+  <div class="sky-nav">
+    <a href="index.html">Home</a>
+    <a href="products.html">Products</a>
+    <a href="Account.html" class="active">My Account</a>
+    <a href="withdraw.html">Withdraw</a>
+    <a href="supplier.html">Supplier</a>
+    <a href="admin.html">Admin</a>
+    <a href="help.html">Help</a>
+  </div>
+</div>
+
+<div class="sec"><h2 id="userName">Welcome, Sky User 👋</h2><p>Verified Reseller PRO • Level: Gold</p><br>
+<div class="stat">
+  <div>Total Earning<br><b id="earn">Rs. 0</b><small id="earnNote" style="font-size:11px;color:#64748b;font-weight:400">Sirf Delivered Orders</small></div>
+  <div>Total Orders<br><b id="ords">0</b><small style="font-size:11px;color:#64748b">Pending: <span id="pendCount">0</span></small></div>
+  <div>Balance<br><b id="bal" style="color:green">Rs. 0</b><small style="font-size:11px;color:#64748b">Withdraw ke liye ready</small></div>
+</div><br>
+<div class="card"><div class="pad"><h3>👥 Refer & Earn - Rs. 200 per Referral</h3><p id="refLink">https://bilalzia78.github.io/SKY-SHOPPING/?ref=109</p><button class="btn btn-gold" onclick="copyRef()">Copy Referral Link</button></div></div><br>
+<div class="card"><div class="pad"><h3>📦 My Orders</h3><div id="orderList">Loading...</div></div></div></div>
+
+<script>
+function copyRef(){ let link=document.getElementById('refLink').innerText; navigator.clipboard.writeText(link); alert('Link Copied'); }
+
+async function loadAccount(){
+  let myName = localStorage.getItem('userName') || localStorage.getItem('sky_reseller_name') || 'Sky User';
+  document.getElementById('userName').innerText='Welcome, '+myName+' 👋';
+  document.getElementById('refLink').innerText='https://bilalzia78.github.io/SKY-SHOPPING/?ref='+encodeURIComponent(myName);
+
+  let oldOrders = JSON.parse(localStorage.getItem('orders')||'[]');
+  let myOrders = [];
+
+  try{
+    let snap = await db.collection('sky_orders').where('reseller','==',myName).get();
+    snap.forEach(d=>{ let o=d.data(); 
+      myOrders.push({id:o.id||d.id.slice(0,6).toUpperCase(), name:o.product, total:o.sellPrice||o.price||o.total||0, status:o.status, profit:o.profit||o.resellerProfit||0}); 
+    });
+  }catch(e){ console.log(e); }
+
+  let allOrders = [...myOrders, ...oldOrders.map(o=>({id:o.id, name:o.name, total:o.total||o.price||0, status:o.status, profit:o.profit||0}))];
+  
+  // ✅ FIXED: Sirf Delivered / Paid pe earning - Confirmed pe NAHI
+  // Confirmed = Sirf order laga hai, Admin ne deliver nahi kiya
+  // Delivered = Admin ne Delivered Approve kiya, AB earning milegi
+  let earnedOrders = allOrders.filter(o=>{
+    let s = String(o.status||'').toLowerCase().trim();
+    return s === 'delivered' || s === 'paid' || s === 'completed' || s === 'complete';
+  });
+  let tpEarned = earnedOrders.reduce((s,o)=>s+Number(o.profit||0),0);
+
+  // Pending kitne hain - jinki earning abhi nahi mili
+  let pendingOrders = allOrders.filter(o=>{
+    let s = String(o.status||'').toLowerCase().trim();
+    return s === 'confirmed' || s === 'pending' || s === 'processing' || s === 'shipped' || s === 'on the way';
+  });
+
+  document.getElementById('earn').innerText='Rs. '+tpEarned;
+  document.getElementById('ords').innerText=allOrders.length;
+  document.getElementById('bal').innerText='Rs. '+tpEarned;
+  document.getElementById('pendCount').innerText = pendingOrders.length;
+
+  document.getElementById('orderList').innerHTML = allOrders.map(o=>{
+    let s = String(o.status||'').toLowerCase();
+    let badge = '';
+    let earnTxt = '';
+    if(s==='delivered' || s==='paid' || s==='completed' || s==='complete'){
+      badge = '<b style="color:green">✅ Delivered - Earning Mil Gayi</b>';
+      earnTxt = ' | Profit: <b style="color:green">Rs. '+o.profit+'</b>';
+    } else if(s==='confirmed' || s==='pending' || s==='processing'){
+      badge = '<b style="color:#f59e0b">⏳ Pending - Admin ke Approve ka Wait Karo</b>';
+      earnTxt = ' | Profit: <b style="color:#94a3b8">Rs. '+o.profit+' (Abhi Nahi Mila)</b>';
+    } else if(s==='cancelled' || s==='rejected'){
+      badge = '<b style="color:red">❌ Cancelled - Earning Nahi Milegi</b>';
+      earnTxt = '';
+    } else {
+      badge = '<b>'+o.status+'</b>';
+    }
+    return `<p style="border-bottom:1px solid #eee;padding:10px 0;line-height:1.6">${o.id} - ${o.name} - Rs. ${o.total} - ${badge}${earnTxt} <a href="return.html" style="color:red">Return</a></p>`;
+  }).join('')||'No Orders Yet - <a href="products.html">Shop Now</a>';
+}
+loadAccount();
+</script></body></html>
