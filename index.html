@@ -3,8 +3,9 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="saving.js"></script>
 </head>
-<bod>
+<body>
  <header><div class="top"><div style="display:flex;align-items:center;gap:10px"><div class="logo"></div><h1>SKY <span>BAZAAR</span></h1></div><button class="btn" style="width:auto;padding:8px 18px" onclick="location.href='supplier.html'">Become Supplier</button></div>
 <nav><a href="index.html" class="active">Home</a><a href="products.html">Products</a><a href="order.html">Order</a><a href="Account.html">My Account</a><a href="withdraw.html">Withdraw</a><a href="supplier.html">Supplier</a><a href="admin.html">Admin</a><a href="return.html">Return</a><a href="help.html">Help</a></nav></header>
   <div style="background:#fff3cd; padding:8px 0px; border-bottom:1px solid #ffe69c; overflow:hidden;">
@@ -31,7 +32,11 @@
     <div style="font-size:26px;">👜</div><div style="font-size:12px; font-weight:700; margin-top:4px;">Bags</div>
   </div>
   <div onclick="goCat('')" style="min-width:75px; text-align:center; background:#1a73e8; border-radius:12px; padding:10px 5px; cursor:pointer;">
-    <!-- Live Order Popup -->
+    <div style="font-size:26px;">🛍️</div><div style="font-size:12px; font-weight:700; margin-top:4px; color:white;">All</div>
+  </div>
+</div>
+
+<!-- Live Order Popup -->
 <div id="liveOrder" style="display:none; position:fixed; top:60px; left:50%; transform:translateX(-50%); background:white; border-radius:12px; box-shadow:0 5px 20px rgba(0,0,0,0.25); padding:10px 14px; font-size:13px; z-index:9999; width:90%; max-width:340px; align-items:center; gap:10px;">
   <div style="font-size:24px;">🛍️</div>
   <div><b id="liveName">Ayesha from Lahore</b><br><span id="liveText" style="color:#666; font-size:12px;">ne abhi Smart Watch order kiya</span><br><span style="color:#25D366; font-size:11px;">● Abhi abhi • Verified Order</span></div>
@@ -59,9 +64,6 @@ function showLive(){
 setTimeout(showLive, 3000);
 setInterval(showLive, 12000);
 </script>
-    <div style="font-size:26px;">🛍️</div><div style="font-size:12px; font-weight:700; margin-top:4px; color:white;">All</div>
-  </div>
-</div>
 
 <script>
 function goCat(cat){
@@ -75,7 +77,7 @@ function goCat(cat){
 <div class="sec"><h2>⭐ Resellers Reviews</h2><div class="grid"><div class="card"><div class="pad">★★★★★<p>"Pehle mahine 22,000 kamaya, payment time par mili."</p><b>- Ayesha, Lahore</b></div></div><div class="card"><div class="pad">★★★★★<p>"Shoe wala hun, Sky par product lagaya, daily 5 orders."</p><b>- Bilal Shoes, Lahore</b></div></div><div class="card"><div class="pad">★★★★★<p>"Return bhi easy hai, customer khush."</p><b>- Sana, Karachi</b></div></div></div></div>
 
 <div class="sec" id="join"><div class="form-box"><h2>🚀 Become Reseller - Free Join</h2><p style="font-size:13px;color:#666">Form bharein, 24h me contact karenge.</p>
-<form id="resellerForm"><input name="fullName" placeholder="Full Name" required><input name="whatsapp" placeholder="WhatsApp 03xx..." required><input name="email" type="email" placeholder="Email" required><input name="city" placeholder="City" required><textarea name="address" placeholder="Full Address" required></textarea><input name="accountNumber" placeholder="JazzCash / EasyPaisa Number" required><button class="btn btn-gold">Apply Now - FREE</button><p id="msg"></p></form></div></div>
+<form id="resellerForm"><input name="fullName" placeholder="Full Name" required><input name="whatsapp" placeholder="WhatsApp 03xx..." required><input name="email" type="email" placeholder="Email" required><input name="city" placeholder="City" required><textarea name="address" placeholder="Full Address" required></textarea><input name="accountNumber" placeholder="JazzCash / EasyPaisa Number" required><button class="btn btn-gold" id="joinBtn">Apply Now - FREE</button><p id="msg"></p></form></div></div>
 
 <footer><h3>SKY BAZAAR</h3><p>support@skybazaar.pakistan@gmail.com | Lahore, Pakistan</p><p>© 2026 Sky Shopping - earn money form home</p></footer>
 <!-- WhatsApp Button -->
@@ -137,7 +139,6 @@ function sendMsg(){
 }
 document.getElementById('chatInput')?.addEventListener('keypress',e=>{ if(e.key==='Enter') sendMsg(); });
 </script>
-</body>
   <script>
 let defaultProducts=[
   {code:'P001',name:'Women Kurta Set',price:4000,img:'pic1.jpg',shop:'Sky Official'},
@@ -150,12 +151,10 @@ async function loadHome(){
     let snap=await db.collection('sky_products').where('status','==','Approved').get();
     snap.forEach(d=>{
       let p=d.data();
-      // ✅ FIX: Ab Supplier Price me 500 add nahi hoga. Jo Supplier ne price rakha hai wahi dikhega.
       let customerPrice = p.price || p.supplierPrice || 0;
       all.push({code:d.id, name:p.name, price:customerPrice, img:p.img, shop:p.supplierName || p.supplier || 'Sky Supplier', supplierPrice:p.supplierPrice || p.price, docId:d.id});
     });
   }catch(e){ console.log('Firebase error',e); }
-  // ✅ FIX: Profit 500 wala box hata diya, kaata hua price bhi hata diya
   document.getElementById('homeGrid').innerHTML=all.map(p=>`<div class="card"><img src="${p.img}" onerror="this.src='https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600'"><div class="pad"><h3>${p.name}</h3><p>By ${p.shop} • Code ${p.code}</p><div class="price">Rs. ${p.price}</div><button class="btn" onclick="orderNow('${p.docId||p.code}','${p.name}','${p.price}','${p.price}')">Order Now</button></div></div>`).join('');
 }
 function orderNow(docId,name,supplierPrice,price){
@@ -166,12 +165,38 @@ function doSearch(){localStorage.setItem('searchQ',document.getElementById('sear
 
 document.getElementById('resellerForm').addEventListener('submit',async e=>{
   e.preventDefault();
+  let btn=document.getElementById('joinBtn');
+  if(btn.disabled) return;
+  btn.disabled=true;
+  btn.innerText='⏳ Save Ho Raha Hai... Rukiye';
+  // ✅ STYLISH SAVING POPUP - saving.js se
+  showSaving('Aapka Reseller Form Save Ho Raha Hai...');
   let data=Object.fromEntries(new FormData(e.target).entries());
   data.createdAt=Date.now(); data.type='reseller';
-  try{ await db.collection('sky_resellers').add(data); }catch(err){ console.log(err); }
-  localStorage.setItem('userName',data.fullName);
-  document.getElementById('msg').innerText='✅ Saved! Welcome to Sky Shopping - Admin aap se contact karega';
-  setTimeout(()=>location.href='products.html',800);
+  let done=false;
+  setTimeout(()=>{
+    if(!done){
+      hideSaving('Ho Gaya! Save Ho Gaya!');
+      btn.disabled=false; btn.innerText='Apply Now - FREE';
+      document.getElementById('msg').innerText='✅ Saved! Welcome to Sky Shopping - Admin aap se contact karega';
+      setTimeout(()=>location.href='products.html',1500);
+    }
+  },4000);
+  try{
+    await db.collection('sky_resellers').add(data);
+    done=true;
+    hideSaving('Ho Gaya! Save Ho Gaya!');
+    btn.disabled=false; btn.innerText='Apply Now - FREE';
+    localStorage.setItem('userName',data.fullName);
+    document.getElementById('msg').innerText='✅ Saved! Welcome to Sky Shopping - Admin aap se contact karega';
+    setTimeout(()=>location.href='products.html',1500);
+  }catch(err){
+    done=true;
+    hideSaving();
+    btn.disabled=false; btn.innerText='Apply Now - FREE';
+    document.getElementById('msg').innerText='❌ Net slow hai, dobara try karo.';
+    console.log(err);
+  }
 });
 loadHome();
 </script></body></html>
