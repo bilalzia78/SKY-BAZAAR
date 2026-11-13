@@ -2,6 +2,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="saving.js"></script>
 </head>
 <body><header><div class="top"><div class="logo"></div><h1>SKY <span>BAZAAR</span></h1></div><nav><a href="index.html">Home</a><a href="products.html">Products</a><a href="Account.html">My Account</a><a href="withdraw.html" class="active">Withdraw</a><a href="admin.html">Admin</a></nav></header>
 <div class="form-box"><h2>💸 Withdraw Money</h2><p>Balance: <b id="bal">Rs. 0</b> • Min Withdraw Rs. 500</p>
@@ -16,17 +17,13 @@ async function loadBalance(){
   let totalPaidWithdraw = 0;
   let hist = [];
   try{
-    // ✅ FIX: Sirf Firebase se gino - Phone wala localStorage mat milao, warna double ho jayega
     let snap = await db.collection('sky_orders').where('reseller','==',myName).get();
     snap.forEach(d=>{
       let o=d.data();
-      // ✅ FIX: Sirf Delivered / Paid wale ka profit - Pending ka nahi
       if(o.status=='Delivered'||o.status=='Paid'){
-        // ✅ FIX: profit ya resellerProfit jo bhi ho, 500 khud se mat lagao
         totalEarned += Number(o.profit || o.resellerProfit || 0);
       }
     });
-    // Pehle se Paid + Pending withdraw kaat lo
     let wSnap = await db.collection('sky_withdraw').where('name','==',myName).get();
     wSnap.forEach(d=>{ let w=d.data(); hist.push(w); if(w.status=='Paid' || w.status=='Pending') totalPaidWithdraw += Number(w.amount||0); });
 
@@ -36,7 +33,6 @@ async function loadBalance(){
     document.getElementById('wHist').innerHTML='<h3>History</h3>'+hist.map(h=>`<p style="border-bottom:1px solid #eee;padding:6px 0">Rs. ${h.amount} - ${h.number||h.account} - ${h.method||''} - <b style="color:${h.status=='Paid'?'green':h.status=='Rejected'?'red':'orange'}">${h.status}</b></p>`).join('')||'<p>No History Yet</p>';
   }catch(e){ 
     console.log(e);
-    // Agar Firebase fail ho to localStorage se ek baar gino - double mat karo
     let orders = JSON.parse(localStorage.getItem('orders')||'[]');
     totalEarned = orders.filter(o=>o.status=='Delivered'||o.status=='Paid').reduce((s,o)=>s+Number(o.profit||0),0);
     myBalance = totalEarned;
@@ -54,8 +50,10 @@ async function doWithdraw(){
   if(!amt || amt<500) return alert('Min 500 - Rs. 500 se kam withdraw nahi hoga');
   if(amt > myBalance) return alert('Balance kam hai! Balance: Rs. '+myBalance+' - Sirf Delivered Orders ka profit withdraw hota hai.');
   let data = { amount: amt, number: acc, account: acc, method: method, name: myName, reseller: myName, status: 'Pending', createdAt: Date.now(), date: new Date().toLocaleString() };
-  try{ await db.collection('sky_withdraw').add(data); }catch(e){ alert('Save nahi hua - firebase-config.js check karo'); return; }
+  try{ showSaving('Aapka Withdraw Request Save Ho Raha Hai...'); }catch(e2){}
+  try{ await db.collection('sky_withdraw').add(data); }catch(e){ try{ hideSaving(); }catch(e2){} alert('Save nahi hua - firebase-config.js check karo'); return; }
   let hist = JSON.parse(localStorage.getItem('withdraws')||'[]'); hist.push(data); localStorage.setItem('withdraws', JSON.stringify(hist));
+  try{ hideSaving('Ho Gaya! Withdraw Request Save Ho Gaya!'); }catch(e2){}
   alert('✅ Withdraw Request Sent! Admin ko mil gaya hai. 24h me payment');
   location.reload();
 }
