@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Help & Support - SKY BAZAAR - Jo Aayega Kamyab Hoga</title>
+<link rel="stylesheet" href="style9.css">
+<link rel="stylesheet" href="css.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="saving.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+body{background:#f1f5f9}
+/* ===== HEADER - Same As Index ===== */
+.sky-header{background:#0a1a3d;color:#fff;padding:14px 16px;position:sticky;top:0;z-index:100}
+.sky-top{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.sky-logo{font-size:22px;font-weight:900;color:#ffd700;text-decoration:none;white-space:nowrap}
+.sky-logo span{color:#fff}
+.sky-tag{font-size:10px;color:#ffd700;font-weight:700;display:block;letter-spacing:0.5px}
+.sky-search{flex:1;max-width:450px;display:flex;background:#fff;border-radius:10px;overflow:hidden}
+.sky-search input{flex:1;border:none;outline:none;padding:11px;font-size:14px;min-width:0}
+.sky-search button{background:#ffd700;border:none;padding:0 16px;font-weight:800;cursor:pointer}
+.sky-nav{display:flex;gap:14px;align-items:center}
+.sky-nav a{color:#fff;text-decoration:none;font-size:13px;font-weight:700}
+.sky-cart{background:#ffd700;color:#0a1a3d;padding:8px 14px;border-radius:10px;text-decoration:none;font-weight:800;font-size:13px}
+.sky-menu{display:none;font-size:22px;cursor:pointer}
+.sky-links{max-width:1100px;margin:10px auto 0;display:flex;gap:16px;overflow-x:auto;white-space:nowrap;padding-bottom:2px}
+.sky-links a{color:#cbd5e1;text-decoration:none;font-size:13px}
+.sky-links a.active{color:#ffd700;font-weight:800}
+/* ===== HELP HERO ===== */
+.help-hero{background:linear-gradient(135deg,#0a1a3d,#1e3a8a);color:#fff;padding:30px 16px;text-align:center}
+.help-hero h1{font-size:28px;margin-bottom:6px}
+.help-hero p{color:#cbd5e1;font-size:14px;margin-bottom:16px}
+.help-search{max-width:520px;margin:0 auto;display:flex;background:#fff;border-radius:14px;overflow:hidden;padding:4px}
+.help-search input{flex:1;border:none;outline:none;padding:12px;font-size:14px;min-width:0}
+.help-search button{background:#ffd700;border:none;padding:12px 18px;border-radius:10px;font-weight:800;cursor:pointer}
+.help-quick{max-width:1100px;margin:18px auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:0 16px}
+.help-card{background:#fff;border-radius:16px;padding:18px 12px;text-align:center;cursor:pointer;box-shadow:0 2px 10px #0001}
+.help-card b{display:block;font-size:26px;margin-bottom:6px}
+.help-card span{font-size:13px;font-weight:700;color:#0a1a3d}
+.help-card small{display:block;font-size:11px;color:#64748b;margin-top:4px}
+.help-wrap{max-width:1100px;margin:18px auto;padding:0 16px;display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:start}
+.help-box{background:#fff;border-radius:18px;padding:20px;box-shadow:0 2px 10px #0001}
+.help-box h2{font-size:18px;margin-bottom:14px;color:#0a1a3d}
+.faq{border:1px solid #e2e8f0;border-radius:12px;margin-bottom:10px;overflow:hidden}
+.faq-q{padding:14px;cursor:pointer;display:flex;justify-content:space-between;gap:10px;font-weight:700;font-size:14px;background:#f8fafc}
+.faq-a{display:none;padding:0 14px 14px;font-size:13px;line-height:1.7;color:#475569}
+.faq.open .faq-a{display:block}
+.faq.open .faq-q{background:#fff7d6}
+.track-box{background:#0a1a3d;color:#fff;border-radius:18px;padding:20px}
+.track-box h2{color:#fff !important}
+.track-box p{color:#cbd5e1;font-size:13px;line-height:1.6;margin-bottom:12px}
+.track-box input{width:100%;padding:12px;border-radius:10px;border:none;outline:none;margin-bottom:10px;font-size:14px}
+.track-box button{width:100%;background:#ffd700;border:none;padding:12px;border-radius:10px;font-weight:800;cursor:pointer}
+.help-form input,.help-form textarea,.help-form select{width:100%;padding:12px;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:10px;font-size:14px;outline:none}
+.help-form button{width:100%;background:#0a1a3d;color:#fff;border:none;padding:13px;border-radius:10px;font-weight:800;cursor:pointer}
+.wa-float{position:fixed;bottom:20px;right:16px;background:#25D366;color:#fff;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;text-decoration:none;box-shadow:0 6px 20px #0004;z-index:999}
+@media(max-width:700px){
+.sky-search{display:none}.sky-nav a{display:none}.sky-menu{display:block}
+.help-quick{grid-template-columns:1fr 1fr}
+.help-wrap{grid-template-columns:1fr}
+.help-hero h1{font-size:24px}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="sky-header">
+  <div class="sky-top">
+    <a href="index.html" class="sky-logo">SKY <span>BAZAAR</span><span class="sky-tag">✨ Jo Aayega Kamyab Hoga ✨</span></a>
+    <div class="sky-search">
+      <input type="text" placeholder="Kya dhoond rahe ho?..." onkeyup="if(event.key==='Enter') location.href='products.html'">
+      <button onclick="location.href='products.html'">🔍</button>
+    </div>
+    <nav class="sky-nav">
+      <a href="index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="help.html" style="color:#ffd700">Help</a>
+      <a href="https://wa.me/923110482356" class="sky-cart" target="_blank">💬 WhatsApp</a>
+    </nav>
+    <span class="sky-menu" onclick="document.getElementById('mMenu').style.display=document.getElementById('mMenu').style.display==='block'?'none':'block'">☰</span>
+  </div>
+  <div id="mMenu" style="display:none;background:#ffffff14;border-radius:12px;padding:12px;margin-top:10px">
+    <a href="index.html" style="display:block;color:#fff;text-decoration:none;padding:8px 0">🏠 Home</a>
+    <a href="products.html" style="display:block;color:#fff;text-decoration:none;padding:8px 0">🛍️ Products</a>
+    <a href="help.html" style="display:block;color:#ffd700;text-decoration:none;padding:8px 0;font-weight:800">🆘 Help</a>
+    <a href="supplier.html" style="display:block;color:#fff;text-decoration:none;padding:8px 0">🏭 Supplier Bano</a>
+    <a href="reseller.html" style="display:block;color:#fff;text-decoration:none;padding:8px 0">👥 Reseller Bano</a>
+  </div>
+  <div class="sky-links">
+    <a href="index.html">🏠 Home</a>
+    <a href="products.html">🛍️ All Products</a>
+    <a href="help.html" class="active">🆘 Help Center</a>
+    <a href="supplier.html">🏭 Supplier</a>
+    <a href="reseller.html">👥 Reseller</a>
+    <a href="admin.html">👑 Admin</a>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<div class="help-hero">
+  <h1>🆘 Kaise Madad Kar Sakte Hain?</h1>
+  <p>Jo Aayega Kamyab Hoga - Hum yahan hain aap ki madad ke liye, Subah 10 - Raat 10</p>
+  <div class="help-search">
+    <input id="faqSearch" type="text" placeholder="Apna sawal likho... jaise: delivery, return, payment" onkeyup="searchFaq(this.value)">
+    <button onclick="searchFaq(document.getElementById('faqSearch').value)">Search</button>
+  </div>
+</div>
+
+<div class="help-quick">
+  <div class="help-card" onclick="document.getElementById('trackBox').scrollIntoView({behavior:'smooth'})"><b>📦</b><span>Track Order</span><small>Order kahan hai?</small></div>
+  <div class="help-card" onclick="openInfo('↩️ Return Policy','Agar cheez kharab ya galat aaye to 7 din ke andar WhatsApp pe rabta karo. Cheez wapas karke paise wapas mil jayenge.')"><b>↩️</b><span>Return / Replace</span><small>7 Din Ki Policy</small></div>
+  <div class="help-card" onclick="window.open('https://wa.me/923110482356?text='+encodeURIComponent('Salam! Mujhe madad chahiye.'),'_blank')"><b>💬</b><span>WhatsApp Karo</span><small>0311-0482356</small></div>
+  <div class="help-card" onclick="document.getElementById('contactForm').scrollIntoView({behavior:'smooth'})"><b>📝</b><span>Shikayat Likho</span><small>Form Bharo</small></div>
+</div>
+
+<div class="help-wrap">
+  <!-- FAQs -->
+  <div class="help-box">
+    <h2>❓ Sab Se Zyada Puche Jane Wale Sawal</h2>
+    <div id="faqList">
+      <div class="faq"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">🛒 Order kaise karein? <span>▼</span></div><div class="faq-a">Product pe <b>Buy Now</b> dabao, apna naam, WhatsApp number aur poora address likho. Order confirm ho jayega. Paise jab cheez ghar aaye tab dene hain.</div></div>
+      <div class="faq"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">🚚 Delivery kitne din me aayegi? <span>▼</span></div><div class="faq-a">Karachi me <b>1-2 din</b>, Lahore / Islamabad me <b>2-3 din</b>, baqi shehron me <b>2-4 din</b>. Rs. 2000+ ke order pe <b>FREE Delivery</b> hai.</div></div>
+      <div class="faq"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">💵 Payment kaise hogi? <span>▼</span></div><div class="faq-a"><b>Cash on Delivery</b> - Pehle cheez dekho, phir paise do. JazzCash / Easypaisa bhi available hai. Advance dene ki zaroorat nahi.</div></div>
+      <div class="faq"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">↩️ Cheez pasand na aaye to? <span>▼</span></div><div class="faq-a">7 din ke andar WhatsApp <b>0311-0482356</b> pe rabta karo. Cheez nayi honi chahiye. Hum wapas le kar paise wapas kar dein ge ya nayi cheez bhej dein ge.</div></div>
+      <div class="faq"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">📦 Order track kaise karein? <span>▼</span></div><div class="faq-a">Upar <b>Track Order</b> box me apna WhatsApp number likho, ya WhatsApp pe apna naam bhejo. Hum bata dein ge aap ka order kahan hai.</div></div>
+      <div class="faq"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">🏭 Supplier / Reseller kaise banein? <span>▼</span></div><div class="faq-a"><b>Supplier</b> banna hai to supplier.html pe jao, <b>Reseller</b> banna hai to reseller.html pe jao. Dono me form bharo, hum WhatsApp pe rabta kar lein ge. <b>Jo Aayega Kamyab Hoga!</b></div></div>
+      <div class="faq"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">🛡️ Cheez original hogi? <span>▼</span></div><div class="faq-a">100% Original ki guarantee hai. Agar nakli nikli to paise wapas + delivery free. SKY BAZAAR pe bharosa karo.</div></div>
+    </div>
+    <div style="text-align:center;margin-top:12px;font-size:13px;color:#64748b">Jawab na mila? 👇 Neeche form bharo ya WhatsApp karo</div>
+  </div>
+
+  <!-- Right Side -->
+  <div>
+    <div class="help-box track-box" id="trackBox">
+      <h2>📦 Apna Order Track Karo</h2>
+      <p>Apna WhatsApp number likho, hum check karke batayen ge.</p>
+      <input id="trackNum" type="tel" placeholder="Apna WhatsApp Number - 0300...">
+      <button onclick="trackOrder()">🔍 Track Karo</button>
+      <p id="trackResult" style="display:none;background:#ffffff1a;padding:10px;border-radius:10px;margin-top:10px"></p>
+    </div>
+
+    <div class="help-box" id="contactForm" style="margin-top:16px">
+      <h2>📝 Madad Ke Liye Form Bharo</h2>
+      <div class="help-form">
+        <input id="hName" type="text" placeholder="Apna Naam *">
+        <input id="hNum" type="tel" placeholder="WhatsApp Number * - 0300...">
+        <select id="hTopic">
+          <option>🛒 Order Ka Masla</option>
+          <option>🚚 Delivery Late Hai</option>
+          <option>↩️ Return / Replace Karna Hai</option>
+          <option>💵 Payment Ka Masla</option>
+          <option>❓ Koi Aur Sawal</option>
+        </select>
+        <textarea id="hMsg" rows="4" placeholder="Apna masla tafseel se likho..."></textarea>
+        <button onclick="sendHelp()">📩 Bhej Do - Hum Rabta Karein Ge</button>
+        <p id="helpDone" style="display:none;color:green;font-size:13px;font-weight:700;margin-top:10px;text-align:center">✅ Shukriya! Aap ka message mil gaya. Hum jald WhatsApp pe rabta karein ge.</p>
+      </div>
+    </div>
+
+    <div class="help-box" style="margin-top:16px;text-align:center">
+      <h2>📞 Seedha Baat Karo</h2>
+      <p style="font-size:13px;color:#475569;line-height:1.7">📍 Karachi, Pakistan<br>📞 <b>0311-0482356</b><br>🕙 Subah 10 - Raat 10 (Roz)<br>✉️ support@skybazaar.pakistan@gmail.com</p>
+      <a href="https://wa.me/923110482356?text=Salam%20SKY%20BAZAAR!%20Mujhe%20madad%20chahiye." target="_blank" style="display:block;background:#25D366;color:#fff;text-decoration:none;padding:13px;border-radius:12px;font-weight:800;margin-top:10px">💬 WhatsApp Pe Baat Karo</a>
+      <a href="tel:03110482356" style="display:block;background:#0a1a3d;color:#fff;text-decoration:none;padding:13px;border-radius:12px;font-weight:800;margin-top:8px">📞 Call Karo</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FOOTER - Same As Index ===== -->
+<style>
+.sky-footer{background:#0a1a3d;color:#fff;padding:28px 16px 14px;margin-top:30px;border-radius:20px 20px 0 0;overflow:hidden}
+.sky-footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:22px;max-width:1100px;margin:0 auto}
+.sky-footer h3{color:#ffd700;margin:0 0 6px;font-size:24px;text-align:left}
+.sky-tagline{color:#ffd700;font-size:13px;font-weight:700;margin:0 0 10px;text-align:left}
+.sky-footer h4{color:#fff;margin:0 0 10px;font-size:15px;text-align:left}
+.sky-footer p{font-size:13px;color:#cbd5e1;line-height:1.7;margin:0 0 10px;text-align:left}
+.sky-footer a{display:block;color:#cbd5e1;text-decoration:none;font-size:13px;margin-bottom:8px;text-align:left;cursor:pointer}
+.sky-footer a:hover{color:#ffd700}
+.sky-badge{display:inline-block;background:#ffd700;color:#0a1a3d;font-size:11px;font-weight:800;padding:7px 12px;border-radius:20px;margin-bottom:12px;text-align:center;line-height:1.4}
+.sky-social{display:flex;gap:8px;margin-top:12px}
+.sky-social a{width:36px;height:36px;background:#ffffff14;border:1px solid #ffffff30;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;margin:0}
+.sky-news{display:flex;gap:6px;margin-top:10px}
+.sky-news input{flex:1;padding:11px;border-radius:10px;border:none;outline:none;font-size:13px;min-width:0}
+.sky-news button{background:#ffd700;border:none;padding:11px 14px;border-radius:10px;font-weight:800;cursor:pointer;color:#0a1a3d;white-space:nowrap}
+.sky-trust{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.sky-trust span{background:#ffffff14;border:1px solid #ffffff30;padding:6px 10px;border-radius:20px;font-size:11px}
+.sky-bottom{max-width:1100px;margin:22px auto 0;padding-top:14px;border-top:1px solid #ffffff20;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:12px;color:#94a3b8;text-align:center}
+.sky-popup{position:fixed;top:0;left:0;width:100%;height:100%;background:#000a;display:none;align-items:center;justify-content:center;z-index:9999;padding:16px}
+.sky-popup-box{background:#fff;color:#0a1a3d;width:100%;max-width:420px;border-radius:18px;padding:20px}
+.sky-popup-box h3{color:#0a1a3d !important;font-size:18px;margin-bottom:10px}
+.sky-popup-box p{color:#334155 !important;font-size:14px;line-height:1.7;text-align:left}
+.sky-popup-box button{width:100%;background:#0a1a3d;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;margin-top:12px}
+@media(max-width:700px){.sky-footer-grid{grid-template-columns:1fr !important;gap:24px}.sky-footer h4{border-bottom:1px solid #ffffff20;padding-bottom:8px}.sky-bottom{flex-direction:column;align-items:center}}
+</style>
+
+<footer class="sky-footer">
+  <div class="sky-footer-grid">
+    <div>
+      <span class="sky-badge">⭐ TRUSTED • FAST • CASH ON DELIVERY</span>
+      <h3>SKY <span style="color:#fff">BAZAAR</span></h3>
+      <p class="sky-tagline">✨ Jo Aayega Kamyab Hoga ✨</p>
+      <p>Pakistan ka apna online bazaar. Sasti, achi aur original cheezein - ghar baithe mangwao, Cash on Delivery pe check karke paise do.</p>
+      <div class="sky-trust"><span>✅ 100% Original</span><span>🚚 Fast Delivery</span><span>💵 Cash on Delivery</span></div>
+      <div class="sky-social">
+        <a href="https://wa.me/923110482356" target="_blank">💬</a>
+        <a href="https://wa.me/923110482356" target="_blank">📘</a>
+        <a href="https://wa.me/923110482356" target="_blank">📸</a>
+        <a href="https://wa.me/923110482356" target="_blank">▶️</a>
+      </div>
+    </div>
+    <div>
+      <h4>🔗 Quick Links</h4>
+      <a href="index.html">🏠 Home</a>
+      <a href="products.html">🛍️ All Products</a>
+      <a href="help.html">🆘 Help Center</a>
+      <a href="supplier.html">🏭 Supplier Bano</a>
+      <a href="reseller.html">👥 Reseller Bano</a>
+    </div>
+    <div>
+      <h4>🛡️ Customer Service</h4>
+      <a onclick="openInfo('↩️ Return Policy','Agar cheez kharab ya galat aaye to 7 din ke andar WhatsApp pe rabta karo. Cheez wapas karke paise wapas mil jayenge.')">↩️ Return Policy</a>
+      <a onclick="openInfo('🚚 Delivery Info','Karachi me 1-2 din, baqi shehron me 2-4 din me delivery ho jati hai. Rs. 2000+ ke order pe FREE delivery hai.')">🚚 Delivery Info</a>
+      <a onclick="openInfo('💳 Payment Method','Cash on Delivery - Pehle cheez dekho, phir paise do. JazzCash / Easypaisa bhi available hai.')">💳 Payment Method</a>
+      <a onclick="openInfo('❓ FAQs','Q: Order kaise karein? - Product pe Buy dabao, naam, number, address likho. Q: Paise kab dene hain? - Jab cheez ghar aaye tab.')">❓ FAQs</a>
+      <a onclick="openInfo('📦 Track Order','Apna order track karne ke liye WhatsApp pe apna naam aur number bhejo, hum bata dein ge aap ka order kahan hai.')">📦 Track Order</a>
+    </div>
+    <div>
+      <h4>📞 Contact Karo</h4>
+      <p>📍 Karachi, Pakistan<br>📞 WhatsApp: <a href="https://wa.me/923110482356" style="display:inline;color:#ffd700;font-weight:700">0311-0482356</a><br>✉️ support@skybazaar.pakistan@gmail.com<br>🕙 Subah 10 - Raat 10 (Roz)</p>
+      <h4 style="margin-top:14px">📩 Offer Paane Ke Liye</h4>
+      <div class="sky-news">
+        <input id="offerNum" type="tel" placeholder="Apna WhatsApp Number">
+        <button onclick="joinOffer()">Join</button>
+      </div>
+    </div>
+  </div>
+  <div class="sky-bottom">
+    <span>© 2026 <b style="color:#fff">SKY BAZAAR</b> - Jo Aayega Kamyab Hoga</span>
+    <span>💳 💵 🏦</span>
+    <span>Made with ❤️ in Pakistan 🇵🇰</span>
+  </div>
+</footer>
+
+<div id="infoPopup" class="sky-popup" onclick="this.style.display='none'">
+  <div class="sky-popup-box" onclick="event.stopPropagation()">
+    <h3 id="infoTitle">Info</h3>
+    <p id="infoText"></p>
+    <button onclick="document.getElementById('infoPopup').style.display='none'">✅ Theek Hai - Band Karo</button>
+  </div>
+</div>
+
+<a href="https://wa.me/923110482356?text=Salam%20SKY%20BAZAAR!%20Mujhe%20madad%20chahiye." target="_blank" class="wa-float">💬</a>
+
+<script>
+function openInfo(t, txt){
+  document.getElementById('infoTitle').innerText = t;
+  document.getElementById('infoText').innerText = txt;
+  document.getElementById('infoPopup').style.display = 'flex';
+}
+function getDB(){
+  try{
+    if(typeof db !== 'undefined' && db.collection) return db;
+    if(typeof firebase !== 'undefined' && firebase.firestore) return firebase.firestore();
+  }catch(e){}
+  return null;
+}
+function joinOffer(){
+  var num = document.getElementById('offerNum').value.trim();
+  if(num.length < 10){ alert('⚠️ Pehle apna poora WhatsApp Number likho'); return; }
+  var myDB = getDB();
+  if(myDB){
+    myDB.collection('newsletter').add({number:num, time:new Date().toLocaleString('en-PK')}).then(function(){ alert('✅ Shukriya! Ab aap ko Offers milengi.'); document.getElementById('offerNum').value=''; });
+  } else { window.open('https://wa.me/923110482356?text='+encodeURIComponent('Offers chahiye. Mera number: '+num),'_blank'); }
+}
+function searchFaq(q){
+  q = q.toLowerCase();
+  document.querySelectorAll('#faqList .faq').forEach(function(f){
+    f.style.display = f.innerText.toLowerCase().includes(q) ? 'block' : 'none';
+    if(q && f.style.display==='block') f.classList.add('open');
+    if(!q) f.classList.remove('open');
+  });
+}
+function trackOrder(){
+  var n = document.getElementById('trackNum').value.trim();
+  if(n.length < 10){ alert('⚠️ Apna WhatsApp Number likho'); return; }
+  var box = document.getElementById('trackResult');
+  box.style.display='block';
+  box.innerHTML='🔍 Check kar rahe hain... Thora sabar karo.';
+  var myDB = getDB();
+  if(myDB){
+    myDB.collection('orders').where('phone','==',n).limit(1).get().then(function(snap){
+      if(!snap.empty){
+        var d = snap.docs[0].data();
+        box.innerHTML='✅ <b>Order Mil Gaya!</b><br>Status: <b>'+(d.status||'Processing')+'</b><br>Product: '+(d.product||d.title||' - ')+'<br>Hum jald deliver kar dein ge.';
+      } else {
+        box.innerHTML='📦 Aap ka order <b>Processing</b> me hai. Tafseel ke liye WhatsApp pe <b>0311-0482356</b> pe apna naam bhejo.';
+      }
+    }).catch(function(){ box.innerHTML='📦 Order Processing me hai. WhatsApp pe rabta karo: <b>0311-0482356</b>'; });
+  } else {
+    box.innerHTML='📦 Order Processing me hai. WhatsApp pe rabta karo: <b>0311-0482356</b>';
+  }
+}
+function sendHelp(){
+  var name=document.getElementById('hName').value.trim();
+  var num=document.getElementById('hNum').value.trim();
+  var topic=document.getElementById('hTopic').value;
+  var msg=document.getElementById('hMsg').value.trim();
+  if(!name || num.length < 10 || !msg){ alert('⚠️ Naam, Number aur Masla - teeno likhna zaroori hai'); return; }
+  var myDB = getDB();
+  if(myDB){
+    myDB.collection('help_messages').add({name:name, number:num, topic:topic, message:msg, time:new Date().toLocaleString('en-PK')}).then(function(){
+      document.getElementById('helpDone').style.display='block';
+      document.getElementById('hName').value=''; document.getElementById('hNum').value=''; document.getElementById('hMsg').value='';
+    });
+  } else {
+    window.open('https://wa.me/923110482356?text='+encodeURIComponent('HELP - Naam: '+name+' | Number: '+num+' | Masla: '+topic+' | '+msg),'_blank');
+  }
+}
+</script>
+</body>
+</html>
