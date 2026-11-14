@@ -5,8 +5,16 @@
 <script src="firebase-config.js"></script><script src="saving.js"></script>
 <style>.info-box{background:#e8f5e9;border:1px solid #a5d6a7;padding:14px;border-radius:14px;margin:12px 0;font-size:13px;line-height:1.6}.upload-box{border:2px dashed #0a1a3d;border-radius:14px;padding:14px;text-align:center;background:#f0f4ff}.upload-box img{max-width:100%;max-height:180px;border-radius:10px;margin-top:10px;display:none}.calc-box{background:#fff8e1;padding:12px;border-radius:12px;font-size:13px;margin:10px 0}.progress-bar{width:100%;height:8px;background:#eee;border-radius:10px;overflow:hidden;display:none;margin-top:8px}.progress-bar div{height:100%;width:0%;background:#0a7a42}.welcome-box{background:#fff3cd;border:1px solid #ffe082;padding:12px;border-radius:12px;display:none;margin:12px 0}</style></head>
 <body><header><div class="top"><div class="logo"></div><h1>SKY <span>BAZAAR</span></h1></div><nav><a href="index.html">Home</a><a href="products.html">Products</a><a href="supplier.html" class="active">Supplier</a><a href="supplier-dashboard.html">My Dashboard</a><a href="Account.html">My Account</a><a href="admin.html">Admin</a></nav></header>
-<div class="sec"><div class="form-box"><h2>📦 Supplier - Product Add Karo</h2><div id="welcomeBox" class="welcome-box"></div>
-<div class="info-box"><b>👋 Supplier, Pehle Ye Parh Lo:</b><br>1. ✅ Paisa Order Delivered ke <b>3 din baad</b> JazzCash / EasyPaisa par.<br>2. ✅ Sky Fee sirf <b>Rs. 100</b> per order.<br>3. ✅ Parcel <b>SKY BAZAAR</b> ke naam se jayega.<br>4. ✅ Return pe paisa <b>nahi</b> milega.<br>5. ✅ Admin <b>Approve</b> karega phir live hoga.</div>
+<div class="info-box">
+<b>👋 Supplier, Pehle Ye Parh Lo - Sab Hisab Saaf:</b><br>
+1. ✅ <b>Paisa Kab Milega?</b> Order Delivered hone ke <b>3 din baad</b> aapke JazzCash / EasyPaisa par.<br>
+2. ✅ <b>Sky Fee Kitni?</b> Har order par sirf <b>Rs. 100</b> katega. Baaki poora paisa aapka.<br>
+3. ✅ <b>Parcel Kaun Bhejega?</b> Parcel <b>SKY BAZAAR</b> ke naam se jayega, aapka naam nahi aayega.<br>
+4. ✅ <b>Return Ka Kya Hoga?</b> Agar customer return karega to paisa aapko <b>nahi</b> milega, product wapis aa jayega.<br>
+5. ✅ <b>Product Kab Live Hoga?</b> Aap product bhejo ge, Admin check karke <b>Approve</b> karega, phir Reseller ko dikhega.<br>
+6. ✅ <b>Rate Kya Rakhu?</b> Wahi rate rakho jo aap dukaan par dete ho. Zyada rate rakho ge to order nahi aayega.
+</div>
+
 <form id="supplierForm">
 <input name="productName" placeholder="Product Naam - Ex: Nike Shoe" required>
 <div class="upload-box"><b>📸 Product Ki Pic</b><br><span style="font-size:12px;color:#666">Gallery se chuno YA link paste karo - Pic khud LINK banegi</span><br><br><input type="file" id="picFile" accept="image/*" onchange="previewPic(this)" style="width:100%"><img id="picPreview"><p id="picStatus" style="font-size:12px;color:green"></p><div class="progress-bar" id="progBar"><div id="progFill"></div></div><p id="uploadMsg" style="font-size:12px;color:#0a7a42"></p></div>
