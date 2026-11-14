@@ -1,0 +1,28 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Supplier - SKY BAZAAR</title><link rel="stylesheet" href="style9.css"><link rel="stylesheet" href="css.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script><script src="saving.js"></script>
+<style>.info-box{background:#e8f5e9;border:1px solid #a5d6a7;padding:14px;border-radius:14px;margin:12px 0;font-size:13px;line-height:1.6}.upload-box{border:2px dashed #0a1a3d;border-radius:14px;padding:14px;text-align:center;background:#f0f4ff}.upload-box img{max-width:100%;max-height:180px;border-radius:10px;margin-top:10px;display:none}.calc-box{background:#fff8e1;padding:12px;border-radius:12px;font-size:13px;margin:10px 0}.progress-bar{width:100%;height:8px;background:#eee;border-radius:10px;overflow:hidden;display:none;margin-top:8px}.progress-bar div{height:100%;width:0%;background:#0a7a42}.welcome-box{background:#fff3cd;border:1px solid #ffe082;padding:12px;border-radius:12px;display:none;margin:12px 0}</style></head>
+<body><header><div class="top"><div class="logo"></div><h1>SKY <span>BAZAAR</span></h1></div><nav><a href="index.html">Home</a><a href="products.html">Products</a><a href="supplier.html" class="active">Supplier</a><a href="supplier-dashboard.html">My Dashboard</a><a href="Account.html">My Account</a><a href="admin.html">Admin</a></nav></header>
+<div class="sec"><div class="form-box"><h2>📦 Supplier - Product Add Karo</h2><div id="welcomeBox" class="welcome-box"></div>
+<div class="info-box"><b>👋 Supplier, Pehle Ye Parh Lo:</b><br>1. ✅ Paisa Order Delivered ke <b>3 din baad</b> JazzCash / EasyPaisa par.<br>2. ✅ Sky Fee sirf <b>Rs. 100</b> per order.<br>3. ✅ Parcel <b>SKY BAZAAR</b> ke naam se jayega.<br>4. ✅ Return pe paisa <b>nahi</b> milega.<br>5. ✅ Admin <b>Approve</b> karega phir live hoga.</div>
+<form id="supplierForm">
+<input name="productName" placeholder="Product Naam - Ex: Nike Shoe" required>
+<div class="upload-box"><b>📸 Product Ki Pic</b><br><span style="font-size:12px;color:#666">Gallery se chuno YA link paste karo - Pic khud LINK banegi</span><br><br><input type="file" id="picFile" accept="image/*" onchange="previewPic(this)" style="width:100%"><img id="picPreview"><p id="picStatus" style="font-size:12px;color:green"></p><div class="progress-bar" id="progBar"><div id="progFill"></div></div><p id="uploadMsg" style="font-size:12px;color:#0a7a42"></p></div>
+<div style="text-align:center;color:#999;font-size:12px">— YA —</div>
+<input name="image" id="imageLink" placeholder="Image Link Paste Karo">
+<label style="font-weight:700">Tumhara Rate (Tumhe Kitna Chahiye?)</label><input name="supplierPrice" id="rateInput" type="number" placeholder="Ex: 1200" required oninput="calcSupplier()">
+<input name="shopName" id="shopNameInput" placeholder="Shop Ka Naam" required>
+<input name="ownerName" id="ownerNameInput" placeholder="Apna Naam" required>
+<input name="whatsapp" id="waInput" placeholder="WhatsApp - 03xx..." required>
+<input name="city" id="cityInput" placeholder="City - Ex: Lahore">
+<input name="stock" type="number" placeholder="Stock - Kitne Piece? Ex: 50" required>
+<textarea name="desc" placeholder="Size, Color, Quality"></textarea>
+<label style="font-weight:700">Category Chuno</label>
+<select name="category" id="catSelect" onchange="checkOtherCat()" required><option value="">-- Category Chuno --</option><option>Abaya / Hijab</option><option>Accessories</option><option>Artificial Jewellery</option><option>Bags / Handbags</option><option>Beauty / Makeup</option><option>Bedsheets / Home</option><option>Books / Stationery</option><option>Clothes - Boys</option><option>Clothes - Girls</option><option>Clothes - Kids</option><option>Clothes - Ladies</option><option>Clothes - Men</option><option>Cosmetics</option><option>Crockery / Kitchen</option><option>Electronics</option><option>Fragrance / Perfume</option><option>Footwear - Chappal</option><option>Footwear - Shoes</option><option>Groceries</option><option>Hair Care</option><option>Home Decor</option><option>Kids Toys</option><option>Kurtis / Kurta</option><option>Lawn / Cotton Suits</option><option>Mobile Covers</option><option>Other</option><option>Shawls / Dupatta</option><option>Sports / Gym</option><option>Sunglasses</option><option>Watches</option><option>Wallet / Belt</option><option>Winter / Hoodie</option></select>
+<input id="otherCat" name="otherCat" placeholder="Apni Category Likho" style="display:none">
+<div class="calc-box" id="calcBox">Rate likho, hisaab aa jayega...</div>
+<button class="btn btn-gold" style="width:100%" id="submitBtn">✅ Product Bhejo - Admin Approve Karega</button><p id="msg"></p>
+</form></div><br><div class="card"><div class="pad"><h3>📦 Mere Bheje Hue Products</h3><div id="myProducts">Loading...</div></div></div></div>
+<script src="supplier.js"></script></body></html>
