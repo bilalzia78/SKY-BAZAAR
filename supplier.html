@@ -1,0 +1,65 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Supplier - SKY BAZAAR</title><link rel="stylesheet" href="style9.css"><link rel="stylesheet" href="css.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="saving.js"></script>
+<style>
+.markaz-top{background:#0b5ed7;color:#fff;padding:22px 16px;text-align:center;border-radius:0 0 18px 18px}
+.markaz-top h1{margin:0;font-size:22px}.markaz-top p{margin:6px 0 0;opacity:.9;font-size:13px}
+.prog-card{background:#fff;margin:14px;border-radius:14px;padding:14px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.bar{width:100%;background:#e9ecef;height:22px;border-radius:20px;overflow:hidden;margin-top:6px}
+.fill{background:#ffc107;height:100%;text-align:center;font-size:13px;font-weight:bold;line-height:22px}
+.step-item{display:flex;gap:12px;align-items:center;margin:12px 0}
+.circle{width:42px;height:42px;border-radius:50%;background:#d3d3d3;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0}
+.circle.done{background:#198754}
+.info-box{background:#e8f5e9;border:1px solid #a5d6a7;padding:14px;border-radius:14px;margin:12px 0;font-size:13px;line-height:1.6}
+.upload-box{border:2px dashed #0a1a3d;border-radius:14px;padding:14px;text-align:center;background:#f0f4ff;margin-bottom:10px}
+.upload-box img{max-width:100%;max-height:180px;border-radius:10px;margin-top:10px;display:none}
+.or-line{text-align:center;color:#999;font-size:12px;margin:8px 0}
+.calc-box{background:#fff8e1;padding:12px;border-radius:12px;font-size:13px;margin:10px 0}
+.progress-bar{width:100%;height:8px;background:#eee;border-radius:10px;overflow:hidden;display:none;margin-top:8px}
+.progress-bar div{height:100%;width:0%;background:#0a7a42}
+.hidden{display:none!important}
+.btn-step{width:100%;background:#0b5ed7;color:#fff;border:0;padding:14px;border-radius:10px;font-size:16px;font-weight:bold;margin-top:12px;cursor:pointer}
+.btn-back{background:#6c757d}.btn-green{background:#198754}
+input,select,textarea{width:100%;padding:12px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;margin-bottom:10px}
+label{font-weight:700;font-size:14px;display:block;margin:12px 0 6px}
+.welcome-box{background:#fff3cd;border:1px solid #ffe082;padding:12px;border-radius:12px;font-size:14px;margin:12px 0;display:none}
+</style></head>
+<body><header><div class="top"><div class="logo"></div><h1>SKY <span>BAZAAR</span></h1></div><nav><a href="index.html">Home</a><a href="products.html">Products</a><a href="supplier.html" class="active">Supplier</a><a href="supplier-dashboard.html">My Dashboard</a><a href="Account.html">My Account</a></nav></header>
+<div id="mainApp"><div class="markaz-top"><h1 id="stepTitle">Step 1: Contact Information</h1><p id="stepSub">Apni basic details batayein</p></div>
+<div class="prog-card"><div style="display:flex;gap:12px;align-items:center"><div style="font-size:40px">👦🏻</div><div style="flex:1"><b>Signup progress</b><br><span id="progText" style="color:#0b5ed7;font-weight:bold">13% complete</span><div class="bar"><div class="fill" id="progFill" style="width:13%">13%</div></div></div></div>
+<div class="step-item"><div class="circle done" id="c1">✓</div><div><b>Contact Information</b><br><small style="color:#666">Basic contact details</small></div></div>
+<div class="step-item"><div class="circle" id="c2">2</div><div><b>Supplier Details</b><br><small style="color:#666">Business & product info</small></div></div>
+<div class="step-item"><div class="circle" id="c3">3</div><div><b>Verification</b><br><small style="color:#666">Document verification</small></div></div></div>
+<div class="sec"><div class="form-box"><div id="welcomeBox" class="welcome-box"></div>
+<div class="info-box"><b>👋 Supplier, Pehle Ye Parh Lo:</b><br>1. ✅ Paisa Delivered ke <b>3 din baad</b> JazzCash / EasyPaisa par.<br>2. ✅ Sky Fee sirf <b>Rs. 100</b> per order.<br>3. ✅ Parcel <b>SKY BAZAAR</b> ke naam se jayega.<br>4. ✅ Return pe paisa <b>nahi</b> milega, product wapis aayega.<br>5. ✅ Admin <b>Approve</b> karega phir live hoga.<br>6. ✅ Wahi rate rakho jo dukaan par dete ho.</div>
+<form id="supplierForm">
+<div id="step1"><h2>Contact Information</h2><hr>
+<label>Shop Ka Naam *</label><input name="shopName" id="shopNameInput" placeholder="Ex: Ahmed Shoes" required>
+<label>Apna Naam *</label><input name="ownerName" id="ownerNameInput" placeholder="Apna Naam" required>
+<label>WhatsApp Number *</label><input name="whatsapp" id="waInput" placeholder="03xx..." required>
+<label>City *</label><input name="city" id="cityInput" placeholder="Ex: Lahore">
+<button type="button" class="btn-step" id="btnToStep2">Aage - Step 2 →</button><p style="font-size:12px;color:#888;text-align:center">Ye info sirf pehli dafa likhni hai.</p></div>
+<div id="step2" class="hidden"><h2>Supplier & Product Details</h2><hr>
+<label>Product Naam *</label><input name="productName" placeholder="Ex: Nike Shoe">
+<div class="upload-box"><b>📸 Product Ki Pic</b><br><span style="font-size:12px;color:#666">Gallery se pic chuno YA link paste karo</span><br><br><input type="file" id="picFile" accept="image/*" onchange="previewPic(this)"><img id="picPreview"><p id="picStatus" style="font-size:12px;color:green"></p><div class="progress-bar" id="progBar"><div id="progFill2"></div></div><p id="uploadMsg" style="font-size:12px;color:#0a7a42"></p></div>
+<div class="or-line">— YA —</div><input name="image" id="imageLink" placeholder="Image Link Paste Karo">
+<label>Tumhara Rate *</label><input name="supplierPrice" id="rateInput" type="number" placeholder="Ex: 1200" oninput="calcSupplier()">
+<div class="calc-box" id="calcBox">Tumhara rate likho, hisaab aa jayega...</div>
+<label>Stock *</label><input name="stock" type="number" placeholder="Ex: 50">
+<label>Category *</label><select name="category" id="catSelect" onchange="checkOtherCat()"><option value="">-- Category Chuno --</option><option>Abaya / Hijab</option><option>Accessories</option><option>Bags / Handbags</option><option>Beauty / Makeup</option><option>Clothes - Ladies</option><option>Clothes - Men</option><option>Clothes - Kids</option><option>Cosmetics</option><option>Electronics</option><option>Fragrance / Perfume</option><option>Footwear - Shoes</option><option>Footwear - Chappal</option><option>Home Decor</option><option>Kids Toys</option><option>Lawn / Cotton Suits</option><option>Watches</option><option>Other</option></select>
+<input id="otherCat" name="otherCat" placeholder="Apni Category Likho" style="display:none">
+<label>Size, Color, Quality</label><textarea name="desc" placeholder="Size, Color, Quality"></textarea>
+<button type="button" class="btn-step btn-back" onclick="goStep(1)">← Peeche</button><button type="button" class="btn-step btn-green" id="btnToStep3">Aage - Step 3 →</button></div>
+<div id="step3" class="hidden"><h2>Business Verification</h2><hr>
+<div style="background:#fff3cd;padding:12px;border-radius:10px;font-size:13px">⚠️ Ye data sirf Admin ko jayega.</div>
+<label>CNIC Number (Optional)</label><input name="cnic" placeholder="Optional">
+<label>CNIC Front Pic (Optional)</label><input type="file" accept="image/*">
+<label>CNIC Back Pic (Optional)</label><input type="file" accept="image/*">
+<label>NTN (Optional)</label><input name="ntn" placeholder="Optional">
+<div id="summaryBox" style="background:#f8f9fa;padding:12px;border-radius:10px;font-size:13px;line-height:1.7"></div>
+<button type="button" class="btn-step btn-back" onclick="goStep(2)">← Peeche</button><button type="submit" class="btn btn-gold" style="width:100%" id="submitBtn">✅ Product Bhejo - Admin Approve Karega</button><p id="msg"></p></div>
+</form></div><br><div class="card"><div class="pad"><h3>📦 Mere Bheje Hue Products - Sirf Mere</h3><div id="myProducts">Loading...</div></div></div></div></div>
+<script src="supplier.js"></script></body></html>
