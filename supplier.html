@@ -1,0 +1,104 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Supplier - SKY BAZAAR</title><link rel="stylesheet" href="style9.css"><link rel="stylesheet" href="css.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script><script src="saving.js"></script>
+<style>.info-box{background:#e8f5e9;border:1px solid #a5d6a7;padding:14px;border-radius:14px;margin:12px 0;font-size:13px;line-height:1.6}.upload-box{border:2px dashed #0a1a3d;border-radius:14px;padding:14px;text-align:center;background:#f0f4ff}.upload-box img{max-width:100%;max-height:180px;border-radius:10px;margin-top:10px;display:none}.calc-box{background:#fff8e1;padding:12px;border-radius:12px;font-size:13px;margin:10px 0}.progress-bar{width:100%;height:8px;background:#eee;border-radius:10px;overflow:hidden;display:none;margin-top:8px}.progress-bar div{height:100%;width:0%;background:#0a7a42}.welcome-box{background:#fff3cd;border:1px solid #ffe082;padding:12px;border-radius:12px;display:none;margin:12px 0}.sop-check{width:18px;height:18px;accent-color:#0a7a42;vertical-align:middle;margin-right:6px}#agreeAll{width:20px;height:20px;accent-color:#0a7a42;vertical-align:middle;margin-right:6px}#submitBtn:disabled{background:#ccc !important;color:#666 !important;cursor:not-allowed}</style></head>
+<body><header><div class="top"><div class="logo"></div><h1>SKY <span>BAZAAR</span></h1></div><nav><a href="index.html">Home</a><a href="products.html">Products</a><a href="supplier.html" class="active">Supplier</a><a href="supplier-dashboard.html">My Dashboard</a><a href="Account.html">My Account</a><a href="admin.html">Admin</a></nav></header>
+<div class="sec"><div class="form-box"><h2>📦 Supplier - Product Add Karo</h2><div id="welcomeBox" class="welcome-box"></div>
+<div class="info-box"><b>👋 Supplier, Pehle Ye Parh Ke Tick Karo:</b><br>
+<label style="display:block;margin:8px 0;background:#fff;padding:8px;border-radius:8px"><input type="checkbox" class="sop-check"> 1. Paisa Order Delivered ke <b>3 din baad</b> JazzCash / EasyPaisa par milega.</label>
+<label style="display:block;margin:8px 0;background:#fff;padding:8px;border-radius:8px"><input type="checkbox" class="sop-check"> 2. Sky Fee sirf <b>Rs. 100</b> per order hai.</label>
+<label style="display:block;margin:8px 0;background:#fff;padding:8px;border-radius:8px"><input type="checkbox" class="sop-check"> 3. Parcel <b>SKY BAZAAR</b> ke naam se jayega.</label>
+<label style="display:block;margin:8px 0;background:#fff;padding:8px;border-radius:8px"><input type="checkbox" class="sop-check"> 4. Return pe paisa <b>nahi</b> milega.</label>
+<label style="display:block;margin:8px 0;background:#fff;padding:8px;border-radius:8px"><input type="checkbox" class="sop-check"> 5. Admin <b>Approve</b> karega phir product live hoga.</label>
+<label style="display:block;margin:12px 0 0 0;font-weight:700;background:#fff3cd;border:1px solid #ffe082;padding:10px;border-radius:8px"><input type="checkbox" id="agreeAll"> ✅ Main ne saari Shartein Parh Li Hain, Mujhe Manzoor Hain</label>
+<p id="sopMsg" style="font-size:12px;color:#d32f2f;font-weight:700;margin:8px 0 0 0">⚠️ Product bhejne ke liye upar saari 6 Tick lagana zaroori hai.</p>
+</div>
+<form id="supplierForm">
+<input name="productName" placeholder="Product Naam - Ex: Nike Shoe" required>
+<div class="upload-box"><b>📸 Product Ki Pic</b><br><span style="font-size:12px;color:#666">Gallery se chuno YA link paste karo - Pic khud CHOTI ho ke upload hogi</span><br><br><input type="file" id="picFile" accept="image/*" onchange="previewPic(this)" style="width:100%"><img id="picPreview"><p id="picStatus" style="font-size:12px;color:green"></p><div class="progress-bar" id="progBar"><div id="progFill"></div></div><p id="uploadMsg" style="font-size:12px;color:#0a7a42"></p></div>
+<div style="text-align:center;color:#999;font-size:12px">— YA —</div>
+<input name="image" id="imageLink" placeholder="Image Link Paste Karo">
+<label style="font-weight:700">Tumhara Rate (Reseller Is Pe Apna Profit Laga Ke Bechay Ga)</label><input name="supplierPrice" id="rateInput" type="number" min="1" placeholder="Ex: 1200" required>
+<input name="shopName" id="shopNameInput" placeholder="Shop Ka Naam" required>
+<input name="ownerName" id="ownerNameInput" placeholder="Apna Naam" required>
+<input name="whatsapp" id="waInput" type="tel" pattern="03[0-9]{9}" placeholder="WhatsApp - 03xx..." required>
+<input name="city" id="cityInput" placeholder="City - Ex: Lahore">
+<input name="stock" type="number" min="1" placeholder="Stock - Kitne Piece? Ex: 50" required>
+<textarea name="desc" placeholder="Size, Color, Quality"></textarea>
+<label style="font-weight:700">Category Chuno</label>
+<select name="category" id="catSelect" onchange="checkOtherCat()" required><option value="">-- Category Chuno --</option><option>Abaya / Hijab</option><option>Accessories</option><option>Artificial Jewellery</option><option>Bags / Handbags</option><option>Beauty / Makeup</option><option>Bedsheets / Home</option><option>Books / Stationery</option><option>Clothes - Boys</option><option>Clothes - Girls</option><option>Clothes - Kids</option><option>Clothes - Ladies</option><option>Clothes - Men</option><option>Cosmetics</option><option>Crockery / Kitchen</option><option>Electronics</option><option>Fragrance / Perfume</option><option>Footwear - Chappal</option><option>Footwear - Shoes</option><option>Groceries</option><option>Hair Care</option><option>Home Decor</option><option>Kids Toys</option><option>Kurtis / Kurta</option><option>Lawn / Cotton Suits</option><option>Mobile Covers</option><option>Other</option><option>Shawls / Dupatta</option><option>Sports / Gym</option><option>Sunglasses</option><option>Watches</option><option>Wallet / Belt</option><option>Winter / Hoodie</option></select>
+<input id="otherCat" name="otherCat" placeholder="Apni Category Likho" style="display:none">
+<div class="calc-box" id="calcBox">Rate likho, hisaab aa jayega...</div>
+<button class="btn btn-gold" style="width:100%" id="submitBtn" disabled>🔒 Pehle Upar Shartein Agree Karo</button><p id="msg"></p>
+</form></div><br><div class="card"><div class="pad"><h3>📦 Mere Bheje Hue Products</h3><div id="myProducts">Loading...</div></div></div></div>
+<script src="supplier.js"></script>
+<script>
+// 1. SOP Agree Logic
+document.querySelectorAll('.sop-check, #agreeAll').forEach(c=>{
+  c.addEventListener('change', ()=>{
+    let all = document.querySelectorAll('.sop-check');
+    let ticked = document.querySelectorAll('.sop-check:checked').length;
+    let agree = document.getElementById('agreeAll').checked;
+    let btn = document.getElementById('submitBtn');
+    let msg = document.getElementById('sopMsg');
+    if(ticked===all.length && agree){
+      btn.disabled=false; btn.innerText='✅ Product Bhejo - Admin Approve Karega';
+      msg.style.color='#0a7a42'; msg.innerText='✅ Shukriya! Ab tum product bhej sakte ho.';
+    } else {
+      btn.disabled=true; btn.innerText='🔒 Pehle Upar Shartein Agree Karo';
+      msg.style.color='#d32f2f'; msg.innerText='⚠️ Product bhejne ke liye upar saari 6 Tick lagana zaroori hai. ('+ticked+'/5 + Agree)';
+    }
+  });
+});
+
+// 2. HISAAB FIX - supplier.js se alag, khud chalega
+const rateInput = document.getElementById('rateInput');
+const calcBox = document.getElementById('calcBox');
+function doCalc(){
+  let rate = parseFloat(rateInput.value) || 0;
+  if(rate <= 0){ calcBox.innerHTML='Rate likho, hisaab aa jayega...'; return; }
+  let fee = 100;
+  let milega = rate - fee;
+  calcBox.innerHTML = '🧮 <b>Hisaab:</b><br>Tumhara Rate: <b>Rs. '+rate+'</b><br>Sky Fee: <b>- Rs. '+fee+'</b><br>Tumhe Milega: <b style="color:green">Rs. '+milega+'</b><br><span style="font-size:12px;color:#666">Agar Reseller 500 profit lagaye to Customer Price = Rs. '+(rate+500)+' banega</span>';
+}
+rateInput.addEventListener('input', doCalc);
+window.calcSupplier = doCalc;
+
+// 3. IMAGE CHOTA KARNE WALA FIX - Pic khud compress hogi
+window.compressedPicFile = null;
+const oldPreview = window.previewPic;
+window.previewPic = function(input){
+  let file = input.files[0];
+  if(!file) return;
+  document.getElementById('picStatus').innerText = 'Pic choti ki ja rahi hai... thora wait karo';
+  let reader = new FileReader();
+  reader.onload = function(e){
+    let img = new Image();
+    img.onload = function(){
+      let max = 800; // Max size 800px
+      let w = img.width, h = img.height;
+      if(w > max){ h = h * max / w; w = max; }
+      if(h > max){ w = w * max / h; h = max; }
+      let canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      canvas.toBlob(function(blob){
+        window.compressedPicFile = new File([blob], file.name, {type:'image/jpeg'});
+        let p = document.getElementById('picPreview');
+        p.src = URL.createObjectURL(blob);
+        p.style.display = 'block';
+        let oldKB = Math.round(file.size/1024);
+        let newKB = Math.round(blob.size/1024);
+        document.getElementById('picStatus').innerText = '✅ Pic choti ho gayi! Pehle: '+oldKB+'KB, Ab: '+newKB+'KB';
+        // Agar purana previewPic bhi tha to usko compressed file de do
+        if(oldPreview){ try{ let dt = new DataTransfer(); dt.items.add(window.compressedPicFile); input.files = dt.files; }catch(e){} }
+      }, 'image/jpeg', 0.7);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+};
+</script>
+</body></html>
