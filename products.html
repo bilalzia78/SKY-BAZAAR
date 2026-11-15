@@ -268,10 +268,8 @@ function openShare(docId){
 function closeShare(){ document.getElementById('shareModal').style.display='none'; }
 function getShareText(){
   let reseller = localStorage.getItem('userName') || 'Sky Reseller';
-  let t = `🔥 ${shareProduct.name} - Sirf Rs. ${getDisplayPrice(shareProduct)} me!\n\nCash on Delivery - Poore Pakistan me Delivery\nOrder karne ke liye message karo\n\nSKY BAZAAR - ${reseller}\nhttps://bilalzia78.github.io/SKY-SHOPPING/products.html`;
-  if(shareProduct.img && !isDataImg(shareProduct.img) && shareProduct.img.length < 500){
-    t += `\n\n📸 Product Photo: ${shareProduct.img}`;
-  }
+  let t = `🔥 ${shareProduct.name} - Sirf Rs. ${getDisplayPrice(shareProduct)} me!\n\nCash on Delivery - Poore Pakistan me Delivery\nOrder karne ke liye message karo\n\nSKY BAZAAR - ${reseller}\nhttps://bilalzia78.github.io/SKY-BAZAAR/products.html`;
+  
   return t;
 }
 function shareWhatsApp(){ shareAny(); }
