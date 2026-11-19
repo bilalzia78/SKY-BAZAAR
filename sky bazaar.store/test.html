@@ -1,0 +1,26 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>TEST</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+</head><body style="font-family:system-ui;padding:20px">
+<h2>🔍 Firebase Test</h2>
+<div id="out" style="background:#f1f5f9;padding:15px;border-radius:10px">Testing...</div>
+<script>
+async function run(){
+  let out=document.getElementById('out');
+  out.innerHTML="Firebase se connect ho raha hai...<br>";
+  try{
+    let fdb=firebase.firestore();
+    let cols=['products','sky_products','supplier_products','pending_products','all_products'];
+    for(let c of cols){
+      try{
+        let s=await fdb.collection(c).limit(5).get();
+        out.innerHTML+=`<br><b>${c}:</b> ${s.size} products mile`;
+        s.forEach(d=>{ let x=d.data(); out.innerHTML+=`<br> - ${x.name||'Naam nahi'} | status: ${x.status||'status khali hai'} | price: ${x.price||x.supplierPrice||'?'}`; });
+      }catch(e){ out.innerHTML+=`<br><b>${c}:</b> ERROR - ${e.message}`; }
+    }
+    out.innerHTML+="<br><br>✅ Test khatam. Jo collection me number aaya, usi me tumhara product hai.";
+  }catch(e){ out.innerHTML="❌ Firebase hi connect nahi hua: "+e.message; }
+}
+run();
+</script></body></html>
