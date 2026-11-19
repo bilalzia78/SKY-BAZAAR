@@ -1,0 +1,116 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Products - SKY BAZAAR</title>
+<meta property="og:title" content="SKY BAZAAR - Products">
+<link rel="stylesheet" href="style9.css"><link rel="stylesheet" href="css.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<style>
+.search-wrap{display:flex;gap:8px;padding:12px;background:#fff;margin-top:10px}
+.search-wrap input{flex:1;padding:12px;border:1px solid #ddd;border-radius:10px;font-size:15px}
+.search-wrap button{padding:12px 18px;border:none;border-radius:10px;background:#0a1a3d;color:#fff;font-weight:700}
+.cat-row{display:flex;gap:8px;overflow-x:auto;padding:10px 12px}
+.cat-row button{padding:8px 16px;border:1px solid #ddd;border-radius:20px;background:#fff;white-space:nowrap;cursor:pointer}
+.cat-row button.active{background:#0a1a3d;color:#fff;border-color:#0a1a3d}
+.prod-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px}
+.prod-card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px #0001}
+.prod-card img{width:100%;height:170px;object-fit:cover;cursor:zoom-in;background:#f1f5f9}
+.prod-card .p-pad{padding:10px}
+.prod-card h3{margin:0;font-size:15px}
+.prod-card p{margin:4px 0;color:#666;font-size:12px}
+.prod-price{font-size:16px;font-weight:800;color:#0a1a3d}
+.btn-row{display:flex;gap:6px;margin-top:8px}
+.btn-row .btn{flex:1}
+.skel{background:#fff;border-radius:14px;overflow:hidden}
+.skel-img{height:170px;background:#eee}
+.skel-line{height:12px;background:#eee;margin:8px 10px;border-radius:6px}
+#imgModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:999;justify-content:center;align-items:center;flex-direction:column;padding:15px}
+#imgModal img{max-width:100%;max-height:75vh;border-radius:14px}
+#imgModal h3{color:#fff;margin:10px 0 4px}
+#imgModal p{color:#ccc;margin:0}
+#shareModal{display:none;position:fixed;bottom:0;left:0;width:100%;background:#fff;border-radius:20px 20px 0 0;z-index:1000;padding:18px}
+.share-btn{display:flex;align-items:center;gap:10px;width:100%;padding:12px;border:1px solid #eee;border-radius:12px;background:#fff;margin-bottom:8px;font-size:15px;text-align:left;cursor:pointer}
+</style>
+</head>
+<body><header><div class="top"><h1>SKY <span>BAZAAR</span></h1></div><nav><a href="index.html">Home</a><a href="products.html" class="active">Products</a><a href="order.html">Order</a><a href="Account.html">My Account</a><a href="withdraw.html">Withdraw</a><a href="admin.html">Admin</a></nav></header>
+<div class="search-wrap"><input id="searchInput" placeholder="Search... Kurta, Shoes, Watch" oninput="doSearch()"><button onclick="doSearch()">Search</button></div>
+<div class="cat-row">
+<button class="active" onclick="setCat('All',this)">All</button>
+<button onclick="setCat('Shoes',this)">Shoes</button>
+<button onclick="setCat('Kurti',this)">Kurta</button>
+<button onclick="setCat('Watch',this)">Watch</button>
+<button onclick="setCat('Bag',this)">Bag</button>
+<button onclick="setCat('Perfume',this)">Perfume</button>
+<button onclick="setCat('Other',this)">Other</button>
+</div>
+<div id="prodGrid" class="prod-grid"></div>
+<div id="loadMsg" style="text-align:center;padding:8px;font-size:13px;color:#666"></div>
+<div id="imgModal" onclick="this.style.display='none'"><img id="fullImg" src=""><h3 id="fullName"></h3><p id="fullPrice"></p><p style="color:#fff;background:#eab308;color:#000;padding:8px 16px;border-radius:20px;margin-top:12px;font-weight:700">Pic par click karo band karne ke liye • ✕ Close</p><button onclick="downloadProductImg();event.stopPropagation()" style="background:#ffd700;border:none;padding:10px 20px;border-radius:20px;font-weight:800;margin-top:10px">⬇️ Download Photo</button></div>
+<div id="shareModal"><h3 style="margin:0 0 12px">📤 Share Karo</h3><button class="share-btn" onclick="shareWhatsApp()">💚 WhatsApp par Share Karo</button><button class="share-btn" onclick="shareFacebook()">💙 Facebook par Share Karo</button><button class="share-btn" onclick="copyShareLink()">🔗 Link Copy Karo</button><button class="share-btn" onclick="shareAny()" style="background:#0a1a3d;color:#fff">📱 Photo + Text Ek Saath Share Karo</button><button class="share-btn" onclick="downloadProductImg()" style="background:#ffd700;font-weight:700">⬇️ Photo Download Karo</button><button class="share-btn" onclick="closeShare()" style="justify-content:center;color:#999">Band Karo</button></div>
+<script>
+let allProducts=[];let activeCat='All';let shareProduct=null;let loadedOnce=false;
+function getDisplayPrice(p){return p.price||p.supplierPrice||p.salePrice||p.resellerPrice||p.cost||0;}
+function getImg(p){return p.img||p.imageUrl||p.image||p.photo||p.imgUrl||p.pic||'';}
+function getShop(p){return p.supplierName||p.supplier||p.shop||p.sellerName||'Sky Official';}
+function isDataImg(u){return typeof u==='string'&&u.indexOf('data:image')===0;}
+function dataURLtoBlob(dataurl){let arr=dataurl.split(','),mime=arr[0].match(/:(.*?);/)[1],bstr=atob(arr[1]),n=bstr.length,u8arr=new Uint8Array(n);while(n--){u8arr[n]=bstr.charCodeAt(n);}return new Blob([u8arr],{type:mime});}
+function getImgBlob(){if(!shareProduct)return null;try{if(isDataImg(getImg(shareProduct)))return dataURLtoBlob(getImg(shareProduct));}catch(e){}return null;}
+function getFastImg(u){if(!u)return 'https://via.placeholder.com/300x300?text=SKY';if(isDataImg(u))return u;if(u.indexOf('images.unsplash.com')>-1)return u+(u.indexOf('?')>-1?'&':'?')+'w=500&q=60&auto=format&fit=crop';return u;}
+function setCat(c,btn){activeCat=c;document.querySelectorAll('.cat-row button').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');render();}
+function doSearch(){render();}
+function showSkeleton(){let h='';for(let i=0;i<6;i++){h+='<div class="skel"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line"></div></div>';}document.getElementById('prodGrid').innerHTML=h;document.getElementById('loadMsg').innerText='⏳ Products load ho rahe hain...';}
+function render(){if(!loadedOnce)return;let q=(document.getElementById('searchInput').value||'').toLowerCase();let list=allProducts.filter(p=>{let catOk=activeCat=='All'||(p.category||'').toLowerCase().includes(activeCat.toLowerCase())||(p.name||'').toLowerCase().includes(activeCat.toLowerCase());let searchOk=!q||(p.name||'').toLowerCase().includes(q)||(p.desc||'').toLowerCase().includes(q)||(p.description||'').toLowerCase().includes(q);return catOk&&searchOk;});if(list.length==0){document.getElementById('prodGrid').innerHTML='<p style="grid-column:1/3;text-align:center;padding:20px">Koi product nahi mila.</p>';return;}document.getElementById('prodGrid').innerHTML=list.map((p,i)=>`<div class="prod-card"><img loading="${i<4?'eager':'lazy'}" src="${getFastImg(getImg(p))}" onclick="openFullPic('${p.docId}')" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x300?text=SKY'"><div class="p-pad"><h3 onclick="openFullPic('${p.docId}')" style="cursor:pointer">${p.name}</h3><p>By ${getShop(p)} • ${p.code||''}</p>${p.desc||p.description?`<p style="font-size:12px;color:#444;background:#f8fafc;padding:6px 8px;border-radius:8px">📝 ${p.desc||p.description}</p>`:''}<div class="prod-price">Rs. ${getDisplayPrice(p)}</div><p style="font-size:11px;color:#888">Stock: ${p.stock??p.quantity??'Available'}</p><div class="btn-row"><button class="btn btn-gold" onclick="goOrder('${p.docId}')">Order</button><button class="btn" style="background:#25D366" onclick="openShare('${p.docId}')">📤 Share</button></div></div></div>`).join('');}
+function openFullPic(docId){let p=allProducts.find(x=>x.docId==docId);if(!p)return;shareProduct=p;document.getElementById('fullImg').src=getFastImg(getImg(p));document.getElementById('fullName').innerText=p.name;document.getElementById('fullPrice').innerText='Rs. '+getDisplayPrice(p)+' • Stock: '+(p.stock??p.quantity??'Available')+((p.desc||p.description)?'\n📝 '+(p.desc||p.description):'');document.getElementById('imgModal').style.display='flex';}
+function openShare(docId){shareProduct=allProducts.find(x=>x.docId==docId);document.getElementById('shareModal').style.display='block';}
+function closeShare(){document.getElementById('shareModal').style.display='none';}
+function getShareText(){let reseller=localStorage.getItem('userName')||'Sky Reseller';return `🔥 ${shareProduct.name} - Sirf Rs. ${getDisplayPrice(shareProduct)} me!\n\n${shareProduct.desc||shareProduct.description?'📝 '+(shareProduct.desc||shareProduct.description)+'\n\n':''}Cash on Delivery - Poore Pakistan me Delivery\nSKY BAZAAR - ${reseller}\nhttps://skybazaar.store/products.html`;}
+function shareWhatsApp(){shareAny();}
+function shareFacebook(){window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),'_blank');}
+function copyShareLink(){navigator.clipboard.writeText(getShareText());alert('✅ Copy ho gaya!');closeShare();}
+async function shareAny(){let text=getShareText();try{let blob=getImgBlob();if(!blob){let res=await fetch(getImg(shareProduct));blob=await res.blob();}let file=new File([blob],"product.jpg",{type:"image/jpeg"});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text:text,title:shareProduct.name});return;}}catch(e){}if(navigator.share){try{await navigator.share({title:shareProduct.name,text:text,url:location.href});}catch(e){}}else{copyShareLink();}}
+async function downloadProductImg(){if(!shareProduct)return;try{let blob=getImgBlob();if(!blob){let res=await fetch(getImg(shareProduct));blob=await res.blob();}let url=URL.createObjectURL(blob);let a=document.createElement('a');a.href=url;a.download=shareProduct.name.replace(/[^a-z0-9]/gi,'_')+'.jpg';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);alert('✅ Photo Download Ho Gayi!');}catch(e){window.open(getImg(shareProduct),'_blank');}closeShare();document.getElementById('imgModal').style.display='none';}
+function goOrder(docId){let p=allProducts.find(x=>x.docId==docId);if(p)localStorage.setItem('selectedProduct',JSON.stringify({code:p.code||docId,name:p.name,price:getDisplayPrice(p)}));location.href='order.html?product='+docId;}
+
+// ===== FIXED LOAD: sab collections se, sirf approved products =====
+function cleanOne(d){
+  let x=d.data();
+  let st=(x.status||'').toString().trim().toLowerCase();
+  if(st!=='approved') return null;
+  return {...x,docId:d.id,code:(x.code||d.id.slice(0,5).toUpperCase())};
+}
+function loadProducts(){
+  let savedQ=localStorage.getItem('searchQ')||'';
+  if(savedQ){document.getElementById('searchInput').value=savedQ;localStorage.removeItem('searchQ');}
+  try{
+    let c=JSON.parse(localStorage.getItem('sky_cached_products')||'[]');
+    if(c.length>0){allProducts=c;loadedOnce=true;render();document.getElementById('loadMsg').innerText='✅ '+c.length+' Products (Saved) - Live update ho raha hai...';}
+  }catch(e){}
+  if(allProducts.length===0) showSkeleton();
+  const fdb=firebase.firestore();
+  const COLS=['products','Products','sky_products','supplier_products','all_products'];
+  let store={},reported=0;
+  function rebuild(){
+    let list=[],seen={};
+    Object.values(store).forEach(arr=>arr.forEach(p=>{if(!seen[p.docId]){seen[p.docId]=1;list.push(p);}}));
+    if(list.length===0&&reported<COLS.length) return;
+    list.sort((a,b)=>((b.createdAt&&b.createdAt.seconds)||0)-((a.createdAt&&a.createdAt.seconds)||0));
+    allProducts=list;loadedOnce=true;
+    try{localStorage.setItem('sky_cached_products',JSON.stringify(list));}catch(e){}
+    document.getElementById('loadMsg').innerText=list.length?('✅ '+list.length+' Products mil gaye'):'⚠️ Koi approved product nahi mila';
+    render();
+  }
+  COLS.forEach(c=>{
+    let first=true;
+    fdb.collection(c).onSnapshot(snap=>{
+      if(first){first=false;reported++;}
+      store[c]=[];snap.forEach(d=>{let v=cleanOne(d);if(v)store[c].push(v);});
+      rebuild();
+    },err=>{
+      if(first){first=false;reported++;}
+      document.getElementById('loadMsg').innerText='❌ '+c+': '+err.message;
+      rebuild();
+    });
+  });
+}
+document.addEventListener('DOMContentLoaded',loadProducts);
+</script>
+</body></html>
