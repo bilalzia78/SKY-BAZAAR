@@ -113,29 +113,6 @@ function loadProducts(){
   });
 }
 document.addEventListener('DOMContentLoaded',loadProducts);
-// SKY OFFICIAL - Tumhare products supplier walo ke saath hi dikhenge
-async function showSkyProducts(){
-  try{
-    let snap = await firebase.firestore().collection('sky_products').get();
-    let html = '';
-    snap.forEach(d=>{
-      let p = d.data();
-      html += '<div style="background:#fff;border:2px solid #ffd700;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px #0001">'
-      + '<img src="'+p.img+'" style="width:100%;height:180px;object-fit:cover">'
-      + '<div style="padding:10px"><span style="background:#ffd700;color:#0a1a3d;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:800">👑 SKY OFFICIAL</span><br><br>'
-      + '<b>'+p.name+'</b><br><span style="font-size:12px;color:#888">'+(p.category||'')+'</span><br>'
-      + '<b style="color:green">Rs. '+p.price+'</b> '+(p.oldPrice?'<del style="color:#999">Rs. '+p.oldPrice+'</del>':'')
-      + '<p style="font-size:12px">'+(p.description||'')+'</p>'
-      + '<button onclick="window.open(\'https://wa.me/923110482356?text=\'+encodeURIComponent(\'Salam! Mujhe SKY Official Product chahiye: '+p.name+' - Rs. '+p.price)+',\'_blank\')" style="width:100%;padding:10px;background:#ffd700;border:none;border-radius:8px;font-weight:700">🛒 Order Karo</button>'
-      + '</div></div>';
-    });
-    if(html){
-      // Products wali grid dhoondo aur sab se upar SKY wale laga do
-      let grid = document.querySelector('#productGrid') || document.querySelector('#products') || document.querySelector('.grid') || document.querySelector('#productList');
-      if(grid){ grid.innerHTML = html + grid.innerHTML; }
-    }
-  }catch(e){ console.log(e); }
-}
-setTimeout(showSkyProducts, 800);
+
 </script>
 </body></html>
