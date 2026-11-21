@@ -1,0 +1,80 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Product Add Karo - SKY BAZAAR</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<style>*{box-sizing:border-box}body{margin:0;font-family:Arial;background:#f1f5f9}.head{background:#0a1a3d;color:#fff;padding:16px;text-align:center}.head b{font-size:26px}.head b span{color:#ffd700}.box{background:#fff;max-width:480px;margin:16px auto;padding:18px;border-radius:16px;box-shadow:0 2px 10px #0002}.box label{font-weight:700;font-size:13px;display:block;margin:12px 0 5px}.box input,.box select,.box textarea{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;outline:none;font-size:14px}.btn{width:100%;padding:13px;border:none;border-radius:10px;background:#ffd700;font-weight:800;font-size:16px;cursor:pointer;margin-top:14px}.preview{width:100%;max-height:280px;object-fit:cover;border-radius:12px;display:none;margin-top:10px}.info{font-size:12px;color:#666;background:#fff8e1;padding:10px;border-radius:10px;margin-top:10px;line-height:1.6}.bar{height:8px;background:#eee;border-radius:20px;overflow:hidden;display:none;margin-top:10px}.bar div{height:100%;background:#00a651;width:0%}.success{background:#e6f9ed;border:1px solid #a5d6a7;padding:12px;border-radius:12px;display:none;margin-top:12px;text-align:center}.row{display:flex;gap:10px}.row div{flex:1}</style>
+</head><body>
+<div class="head"><b>SKY <span>BAZAAR</span></b><div style="font-size:12px;color:#ffd700">✨ Jo Aayega Kamyab Hoga ✨</div><div style="font-size:14px;margin-top:6px">➕ Naya Product Add Karo - SKY Official</div></div>
+<div class="box">
+<label>📸 Product Ki Photo (Khud Choti Ho Jayegi)</label>
+<input type="file" id="imgInput" accept="image/*">
+<img id="preview" class="preview">
+<div class="info" id="sizeInfo">📷 Photo chuno, ye khud hi 80-150 KB ki ho jayegi. Memory nahi bharegi.</div>
+<div class="bar" id="bar"><div id="barFill"></div></div>
+
+<label>🛍️ Product Ka Naam *</label>
+<input id="pName" placeholder="Jaise: MAN'S CLOTH">
+
+<div class="row"><div><label>💰 Bechne Wali Price (Rs.) *</label><input id="pPrice" type="number" placeholder="500"></div><div><label>🏷️ Purani Price (Discount)</label><input id="pOldPrice" type="number" placeholder="1000 - Khali bhi chor sakte ho"></div></div>
+
+<label>🏭 Supplier Price (Rs.) - Sirf tumhe pata chalegi</label>
+<input id="pSupPrice" type="number" placeholder="Jaise: 215">
+
+<div class="row"><div><label>📂 Category</label><select id="pCat"><option>Men</option><option>Women</option><option>Kids</option><option>Electronics</option><option>Home</option><option>Beauty</option><option>Other</option></select></div><div><label>📦 Stock</label><input id="pStock" type="number" value="10"></div></div>
+
+<div class="row"><div><label>📏 Size</label><select id="pSize"><option>Free Size</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>S, M, L, XL</option></select></div><div><label>🎨 Color</label><input id="pColor" placeholder="Jaise: Black, White"></div></div>
+
+<label>📝 Description - Poori Detail *</label>
+<textarea id="pDesc" rows="4" placeholder="Kapra kaisa hai? Size kya hai? Delivery kitne din me? Sab likho..."></textarea>
+
+<label>📱 WhatsApp Number (Order ke liye)</label>
+<input id="pPhone" placeholder="0311-0482356">
+
+<div class="success" id="successBox">✅ <b>Ho Gaya!</b><br>Product <b>SKY Official</b> ke naam se Pending me chala gaya.<br>Admin Approve karega to website pe aa jayega.</div>
+<button class="btn" id="saveBtn" onclick="saveProduct()">✅ PRODUCT ADD KARO →</button>
+<p style="text-align:center;font-size:12px;color:#888"><a href="index.html" style="color:#0a1a3d">← Website Pe Wapas</a> | <a href="admin.html" style="color:#0a1a3d">Admin Kholo</a></p>
+</div>
+<script>
+let compressedImg=""; let originalSize=0, compressedSize=0;
+document.getElementById('imgInput').addEventListener('change', function(e){
+  let file=e.target.files[0]; if(!file) return; originalSize=file.size;
+  let reader=new FileReader();
+  reader.onload=function(ev){ let img=new Image(); img.onload=function(){ let canvas=document.createElement('canvas'); let maxW=800; let scale=Math.min(1, maxW/img.width); canvas.width=img.width*scale; canvas.height=img.height*scale; let ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0,canvas.width,canvas.height); compressedImg=canvas.toDataURL('image/jpeg',0.70); compressedSize=Math.round((compressedImg.length*3/4)/1024); let origKB=Math.round(originalSize/1024); document.getElementById('preview').src=compressedImg; document.getElementById('preview').style.display='block'; document.getElementById('sizeInfo').innerHTML='✅ <b>Photo Choti Ho Gayi</b><br>📷 Pehle: '+origKB+' KB → Ab: '+compressedSize+' KB<br>💾 Tumne <b>'+(origKB-compressedSize)+' KB</b> bacha liya!'; document.getElementById('sizeInfo').style.background='#e6f9ed'; }; img.src=ev.target.result; }; reader.readAsDataURL(file);
+});
+async function saveProduct(){
+  let name=document.getElementById('pName').value.trim();
+  let price=document.getElementById('pPrice').value.trim();
+  let oldPrice=document.getElementById('pOldPrice').value.trim();
+  let supPrice=document.getElementById('pSupPrice').value.trim();
+  let cat=document.getElementById('pCat').value;
+  let stock=document.getElementById('pStock').value.trim();
+  let size=document.getElementById('pSize').value;
+  let color=document.getElementById('pColor').value.trim();
+  let desc=document.getElementById('pDesc').value.trim();
+  let phone=document.getElementById('pPhone').value.trim();
+  if(!name||!price){alert('❌ Naam aur Price to likho!');return;}
+  if(!compressedImg){alert('❌ Photo to chuno!');return;}
+  if(!desc){alert('❌ Description to likho!');return;}
+  let btn=document.getElementById('saveBtn'); btn.innerText='⏳ Rukho, Upload Ho Raha Hai...'; btn.disabled=true;
+  document.getElementById('bar').style.display='block'; document.getElementById('barFill').style.width='30%';
+  try{
+    await firebase.firestore().collection('sky_products').add({
+      name:name, title:name,
+      price:Number(price), oldPrice:Number(oldPrice||0), originalPrice:Number(oldPrice||0),
+      supplierPrice:Number(supPrice||0),
+      category:cat, stock:Number(stock||10), size:size, color:color,
+      description:desc, desc:desc,
+      phone:phone, whatsapp:phone,
+      img:compressedImg, image:compressedImg, imageUrl:compressedImg,
+      status:'pending', supplierName:'SKY Official', supplier:'SKY Official', shop:'SKY Official',
+      createdAt:new Date().toISOString(), time:new Date().toLocaleString()
+    });
+    document.getElementById('barFill').style.width='100%';
+    document.getElementById('successBox').style.display='block';
+    document.getElementById('pName').value='';document.getElementById('pPrice').value='';document.getElementById('pOldPrice').value='';document.getElementById('pSupPrice').value='';document.getElementById('pDesc').value='';document.getElementById('pColor').value='';document.getElementById('pPhone').value='';
+    document.getElementById('preview').style.display='none'; compressedImg='';
+    btn.innerText='✅ PRODUCT ADD KARO →'; btn.disabled=false;
+    setTimeout(()=>{document.getElementById('successBox').style.display='none';document.getElementById('bar').style.display='none';},5000);
+  }catch(e){alert('❌ Error: '+e.message); btn.innerText='✅ PRODUCT ADD KARO →'; btn.disabled=false;}
+}
+</script></body></html>
