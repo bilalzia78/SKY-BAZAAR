@@ -1,0 +1,217 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Supplier - SKY BAZAAR</title>
+<link rel="stylesheet" href="style9.css"><link rel="stylesheet" href="css.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script><script src="saving.js"></script>
+<style>
+.info-box{background:#e8f5e9;border:1px solid #a5d6a7;padding:14px;border-radius:14px;margin:12px 0;font-size:13px;line-height:1.6}
+.upload-box{border:2px dashed #0a1a3d;border-radius:14px;padding:14px;text-align:center;background:#f0f4ff}
+.upload-box img{max-width:100%;max-height:180px;border-radius:10px;margin-top:10px;display:none}
+.calc-box{background:#fff8e1;padding:12px;border-radius:12px;font-size:13px;margin:10px 0;line-height:1.8}
+.progress-bar{width:100%;height:8px;background:#eee;border-radius:10px;overflow:hidden;display:none;margin-top:8px}
+.progress-bar div{height:100%;width:0%;background:#0a7a42}
+.welcome-box{background:#fff3cd;border:1px solid #ffe082;padding:12px;border-radius:12px;display:none;margin:12px 0}
+.sop-check{width:18px;height:18px;accent-color:#0a7a42;vertical-align:middle;margin-right:6px}
+#agreeAll{width:20px;height:20px;accent-color:#0a7a42;vertical-align:middle;margin-right:6px}
+#submitBtn:disabled{background:#ccc!important;color:#666!important;cursor:not-allowed}
+.hidden{display:none!important}
+.sky-hero{background:linear-gradient(135deg,#0a1a3d 0%,#143a8a 60%,#0a1a3d 100%);color:#fff;padding:24px 16px;text-align:center;border-radius:18px;margin:12px 0}
+.sky-hero h1{font-size:28px;margin:8px 0}
+.sky-hero h1 span{color:#ffd700}
+.sky-hero p{opacity:.85;font-size:14px;line-height:1.5;margin:0}
+.sky-badge{display:inline-block;background:#ffd700;color:#0a1a3d;font-size:11px;font-weight:800;padding:6px 12px;border-radius:20px}
+.sky-steps{display:flex;gap:8px;margin:14px 0}
+.sky-steps div{flex:1;text-align:center;font-size:12px;font-weight:700;color:#999}
+.sky-steps div b{width:36px;height:36px;border-radius:50%;background:#e8ecf3;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;color:#999;font-size:15px}
+.sky-steps div.on{color:#0a1a3d}
+.sky-steps div.on b{background:#0a1a3d;color:#ffd700}
+.sky-progress{height:10px;background:#e8ecf3;border-radius:20px;overflow:hidden}
+.sky-progress i{display:block;height:100%;background:#ffd700;transition:.3s}
+.sky-warn{background:#fff7d6;border:1px solid #ffe27a;padding:12px;border-radius:12px;font-size:13px;line-height:1.6}
+</style></head>
+<body><header><div class="top"><div class="logo"></div><h1>SKY <span>BAZAAR</span></h1></div><nav><a href="index.html">Home</a><a href="products.html">Products</a><a href="supplier.html" class="active">Supplier</a><a href="supplier-dashboard.html">My Dashboard</a><a href="Account.html">My Account</a>
+</nav></header>
+
+<div class="sec"><div class="form-box">
+
+<div id="authBox">
+<div id="signupBox">
+<div class="sky-hero">
+<span class="sky-badge">☁️ SKY BAZAAR - SUPPLIER CENTER</span>
+<h1>Become a <span>Sky Seller</span> 🚀</h1>
+<p>5 minute me Account banao — Admin approve karega to Login milega.<br><b style="color:#ffd700">0 Rs Joining Fee • Har Jumma Payment</b></p>
+</div>
+<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700"><span id="stepTitle">Step 1: Contact Information</span><span id="skyProgText">33% Complete</span></div>
+<div class="sky-progress" style="margin-top:8px"><i id="skyProgBar" style="width:33%"></i></div>
+<div class="sky-steps">
+<div id="skySt1" class="on"><b>1</b>Contact</div>
+<div id="skySt2"><b>2</b>Shop Details</div>
+<div id="skySt3"><b>3</b>Verification</div>
+</div>
+<div class="sky-warn">⚠️ <b>Zaroori:</b> Saari information sahi likhni hai. Ghalat details pe application reject ho jayegi.<br>⚠️ Approval <b>Sky Bazaar Team</b> ki verification ke baad hogi.</div>
+<div id="skyStep1" style="margin-top:14px">
+<h3 style="margin:0;color:#0a1a3d">Contact Information</h3>
+<input id="fName" placeholder="Full Name * - Apna poora naam" style="width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:10px">
+<input id="fPhone" placeholder="Phone Number * - 03xx xxxxxxx" style="width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:10px">
+<input id="fEmail" placeholder="Email Address *" style="width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:10px">
+<input id="fCityTop" placeholder="City * - Ex: Lahore" style="width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:10px">
+<h4 style="margin:14px 0 4px">Pickup Address</h4>
+<p style="font-size:12px;color:#666;margin:0">Jahan se apka parcel pick kiya jayega</p>
+<input id="fShopNo" placeholder="Shop / House Number * - e.g. Shop 12" style="width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:10px">
+<input id="fStreet" placeholder="Street Number * - e.g. Street 7, Block A" style="width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:10px">
+<input id="fArea" placeholder="Area / Locality * - e.g. Main Bazaar" style="width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:10px">
+<input id="fLandmark" placeholder="Famous Landmark * - e.g. Near Masjid / Market" style="width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:10px">
+<button class="btn btn-gold" style="width:100%" onclick="skyStep(2)">Aage - Step 2 →</button>
+<p style="font-size:13px;text-align:center;color:#666">Pehle se Account hai? <b style="color:#0a1a3d;cursor:pointer" onclick="showLoginOnly()">Login Karo →</b></p>
+</div>
+<div id="skyStep2" class="hidden" style="margin-top:14px">
+<h3 style="margin:0;color:#0a1a3d">Shop & Business Details</h3>
+<input id="fShop" placeholder="Shop Ka Naam * - Jaise: Ahmed Store" style="width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:10px">
+<input id="fCatTop" placeholder="Kya Bechte Ho? * - Kapre, Shoes, Watch..." style="width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:10px">
+<input id="fCnic" placeholder="CNIC Number * - 35202-xxxxxxx-x" style="width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:10px">
+<input id="fPass" type="password" placeholder="Password Banao * - Yaad rakhna" style="width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:10px">
+<input id="fAbout" placeholder="Apne baare me thora likho (Optional)" style="width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:10px">
+<div style="display:flex;gap:8px"><button class="btn" style="flex:1;background:#eee" onclick="skyStep(1)">← Peeche</button><button class="btn btn-gold" style="flex:1" onclick="skyStep(3)">Aage - Step 3 →</button></div>
+</div>
+<div id="skyStep3" class="hidden" style="margin-top:14px">
+<h3 style="margin:0;color:#0a1a3d">Verification</h3>
+<input id="fPic" placeholder="CNIC / Shop Pic Ka Link (Optional) - Ya WhatsApp pe bhejo" style="width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:10px">
+<label style="display:block;margin:12px 0;font-size:13px"><input type="checkbox" id="fAgree" style="width:auto"> Me tasdeeq karta/karti hun ke maloomat durust hai aur Sky Bazaar policy manzoor hai.</label>
+<button class="btn btn-gold" style="width:100%" onclick="skySubmit()">✅ Account Banao - Sky Bazaar Ko Bhejo</button>
+<p id="applyMsg" style="display:none;color:#0a7a42;font-weight:700;text-align:center">✅ Apply Ho Gaya! Admin approve karega to Login hoga.</p>
+<button class="btn" style="width:100%;background:#eee;margin-top:8px" onclick="skyStep(2)">← Peeche</button>
+</div>
+</div>
+<div id="loginBox" class="hidden">
+<div class="sky-hero">
+<span class="sky-badge">☁️ SKY BAZAAR</span>
+<h1>Welcome Back <span>Sky Seller</span></h1>
+<p>Apna WhatsApp number se Login karo.<br>Sirf Approved Seller Login kar sakta hai.</p>
+</div>
+<input id="loginPhone" placeholder="WhatsApp - 03xx xxxxxxx" style="width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:10px">
+<div id="otpBox" class="hidden">
+<input id="loginOTP" placeholder="6 Digit OTP - Screen pe aayega" style="width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:10px">
+<button class="btn btn-gold" style="width:100%" onclick="skyVerifyOTP()">✅ Verify OTP - Login Karo</button>
+</div>
+<button class="btn" style="width:100%;background:#0a1a3d;color:#fff" id="loginBtnMain" onclick="skyLogin()">OTP Bhejo</button>
+<p id="loginErr" style="color:red;font-size:13px;text-align:center;display:none"></p>
+<p style="font-size:13px;text-align:center;color:#666">Naya Account banana hai? <b style="color:#0a1a3d;cursor:pointer" onclick="showSignupOnly()">← Signup Pe Jao</b></p>
+</div>
+</div>
+
+<div id="mainBox" class="hidden">
+<h2>📦 Supplier - Product Add Karo</h2>
+<div id="welcomeBox" class="welcome-box" style="display:block">👋 Welcome, <b id="supNameShow">Sky Seller</b> ✔ Verified - Ab Product Add karo!</div>
+<div style="text-align:right"><button onclick="skyLogout()" style="border:none;background:none;color:red;font-weight:700;cursor:pointer">Logout →</button></div>
+
+<div class="info-box"><b>👋 Supplier, Pehle Ye Parh Ke Tick Karo:</b><br>
+<label style="display:block;margin:8px 0;background:#fff;padding:8px;border-radius:8px"><input type="checkbox" class="sop-check"> 1. Paisa Order Delivered ke <b>3 din baad</b> JazzCash / EasyPaisa par milega.</label>
+<label style="display:block;margin:8px 0;background:#fff;padding:8px;border-radius:8px"><input type="checkbox" class="sop-check"> 2. Sky Fee <b>15%</b> per order hai (Kam se kam <b>100 Rs.</b>)</label>
+<label style="display:block;margin:8px 0;background:#fff;padding:8px;border-radius:8px"><input type="checkbox" class="sop-check"> 3. Parcel <b>SKY BAZAAR</b> ke naam se jayega.</label>
+<label style="display:block;margin:8px 0;background:#fff;padding:8px;border-radius:8px"><input type="checkbox" class="sop-check"> 4. Return pe paisa <b>nahi</b> milega.</label>
+<label style="display:block;margin:8px 0;background:#fff;padding:8px;border-radius:8px"><input type="checkbox" class="sop-check"> 5. Admin <b>Approve</b> karega phir product live hoga.</label>
+<label style="display:block;margin:12px 0 0 0;font-weight:700;background:#fff3cd;border:1px solid #ffe082;padding:10px;border-radius:8px"><input type="checkbox" id="agreeAll"> ✅ Main ne saari Shartein Parh Li Hain, Mujhe Manzoor Hain</label>
+<p id="sopMsg" style="font-size:12px;color:#d32f2f;font-weight:700;margin:8px 0 0 0">⚠️ Product bhejne ke liye upar saari 6 Tick lagana zaroori hai.</p>
+</div>
+
+<form id="supplierForm">
+<input name="productName" placeholder="Product Naam - Ex: Nike Shoe" required>
+<div class="upload-box"><b>📸 Product Ki Pic</b><br><span style="font-size:12px;color:#666">Gallery se chuno YA link paste karo - Pic khud CHOTI ho ke LINK banegi</span><br><br><input type="file" id="picFile" accept="image/*" onchange="previewPic(this)" style="width:100%"><img id="picPreview"><p id="picStatus" style="font-size:12px;color:green"></p><div class="progress-bar" id="progBar"><div id="progFill"></div></div><p id="uploadMsg" style="font-size:12px;color:#0a7a42"></p></div>
+<div style="text-align:center;color:#999;font-size:12px">— YA —</div>
+<input name="image" id="imageLink" placeholder="Image Link Paste Karo">
+<label style="font-weight:700">Tumhara Rate (Reseller Is Pe Apna Profit Laga Ke Bechay Ga)</label><input name="supplierPrice" id="rateInput" type="number" min="1" placeholder="Ex: 1200" required oninput="calcSupplier()">
+<input name="shopName" id="shopNameInput" placeholder="Shop Ka Naam" required>
+<input name="ownerName" id="ownerNameInput" placeholder="Apna Naam" required>
+<input name="whatsapp" id="waInput" type="tel" pattern="03[0-9]{9}" placeholder="WhatsApp - 03xx..." required>
+<input type="password" name="password" id="passwordInput" placeholder="Apna Password Rakho - Yaad rakhna" required>
+<input name="city" id="cityInput" placeholder="City - Ex: Lahore">
+<input name="stock" type="number" min="1" placeholder="Stock - Kitne Piece? Ex: 50" required>
+<textarea name="desc" placeholder="Size, Color, Quality"></textarea>
+<label style="font-weight:700">Category Chuno</label>
+<select name="category" id="catSelect" onchange="checkOtherCat()" required><option value="">-- Category Chuno --</option><option>Abaya / Hijab</option><option>Accessories</option><option>Artificial Jewellery</option><option>Bags / Handbags</option><option>Beauty / Makeup</option><option>Bedsheets / Home</option><option>Books / Stationery</option><option>Clothes - Boys</option><option>Clothes - Girls</option><option>Clothes - Kids</option><option>Clothes - Ladies</option><option>Clothes - Men</option><option>Cosmetics</option><option>Crockery / Kitchen</option><option>Electronics</option><option>Fragrance / Perfume</option><option>Footwear - Chappal</option><option>Footwear - Shoes</option><option>Groceries</option><option>Hair Care</option><option>Home Decor</option><option>Kids Toys</option><option>Kurtis / Kurta</option><option>Lawn / Cotton Suits</option><option>Mobile Covers</option><option>Other</option><option>Shawls / Dupatta</option><option>Sports / Gym</option><option>Sunglasses</option><option>Watches</option><option>Wallet / Belt</option><option>Winter / Hoodie</option></select>
+<input id="otherCat" name="otherCat" placeholder="Apni Category Likho" style="display:none">
+<div class="calc-box" id="calcBox">Rate likho, hisaab aa jayega...</div>
+<button class="btn btn-gold" style="width:100%" id="submitBtn" disabled>🔒 Pehle Upar Shartein Agree Karo</button><p id="msg"></p>
+</form>
+</div>
+
+</div><br><div class="card"><div class="pad"><h3>📦 Mere Bheje Hue Products</h3><div id="myProducts">Loading...</div></div></div></div>
+
+<script src="supplier.js"></script>
+<script>
+let skyOTP="", skyPhone="", skyData=null;
+function skyClean(v){ let p=(v||"").trim().replace(/[^0-9]/g,''); if(p.startsWith('03')) p='92'+p.slice(1); if(p.startsWith('3')&&p.length===10) p='92'+p; return p; }
+function skyDisp(p){ if(p&&p.startsWith('92')) return '0'+p.slice(2); return p; }
+function showLoginOnly(){ document.getElementById('signupBox').classList.add('hidden'); document.getElementById('loginBox').classList.remove('hidden'); window.scrollTo(0,0); }
+function showSignupOnly(){ document.getElementById('loginBox').classList.add('hidden'); document.getElementById('signupBox').classList.remove('hidden'); window.scrollTo(0,0); }
+function skyStep(n){
+if(n===2 && (!document.getElementById('fName').value.trim() || !document.getElementById('fPhone').value.trim())){ alert('Naam aur Phone zaroor likho'); return; }
+if(n===3 && (!document.getElementById('fShop').value.trim() || !document.getElementById('fCnic').value.trim())){ alert('Shop aur CNIC zaroor likho'); return; }
+[1,2,3].forEach(x=>{ document.getElementById('skyStep'+x).classList.add('hidden'); document.getElementById('skySt'+x).classList.remove('on'); });
+document.getElementById('skyStep'+n).classList.remove('hidden');
+document.getElementById('skySt'+n).classList.add('on');
+let titles={1:'Step 1: Contact Information',2:'Step 2: Shop & Business Details',3:'Step 3: Verification'}[n];
+let pct={1:'33%',2:'66%',3:'100%'}[n];
+document.getElementById('stepTitle').innerText=titles;
+document.getElementById('skyProgText').innerText=pct+' Complete';
+document.getElementById('skyProgBar').style.width=pct;
+window.scrollTo(0,0);
+}
+async function skySubmit(){
+if(!document.getElementById('fAgree').checked){ alert('Pehle Policy pe tick karo'); return; }
+try{
+let fdb=firebase.firestore();
+let phone=skyClean(document.getElementById('fPhone').value);
+await fdb.collection('suppliers').add({
+name:document.getElementById('fName').value.trim(), phone:phone, phoneDisplay:skyDisp(phone),
+email:document.getElementById('fEmail').value.trim(), city:document.getElementById('fCityTop').value.trim(),
+shop:document.getElementById('fShop').value.trim(), category:document.getElementById('fCatTop').value.trim(),
+cnic:document.getElementById('fCnic').value.trim(), password:document.getElementById('fPass').value,
+shopNo:document.getElementById('fShopNo').value.trim(), street:document.getElementById('fStreet').value.trim(),
+area:document.getElementById('fArea').value.trim(), landmark:document.getElementById('fLandmark').value.trim(),
+about:document.getElementById('fAbout').value.trim(), pic:document.getElementById('fPic').value.trim(),
+status:'pending', source:'Sky Bazaar - 3 Step System',
+createdAt:firebase.firestore.FieldValue.serverTimestamp()
+});
+document.getElementById('applyMsg').style.display='block';
+setTimeout(()=>{ showLoginOnly(); document.getElementById('loginPhone').value=skyDisp(phone); alert('✅ Account Ban Gaya! Ab Admin approve karega to Login hoga.'); },800);
+}catch(e){ alert('❌ Error: '+e.message); }
+}
+async function skyLogin(){
+let phone=skyClean(document.getElementById('loginPhone').value);
+let err=document.getElementById('loginErr'); err.style.display='none';
+if(phone.length<12){ err.innerText='❌ Sahi WhatsApp Number likho'; err.style.display='block'; return; }
+document.getElementById('loginBtnMain').innerText='Checking...';
+try{
+let fdb=firebase.firestore();
+let snap=await fdb.collection('suppliers').where('phone','==',phone).limit(1).get();
+if(snap.empty) snap=await fdb.collection('suppliers').where('phone','==',skyDisp(phone)).limit(1).get();
+if(snap.empty){ err.innerText='❌ Account nahi mila. Pehle 3 Step se Account banao.'; err.style.display='block'; document.getElementById('loginBtnMain').innerText='OTP Bhejo'; return; }
+let data=snap.docs[0].data(); skyData={...data,docId:snap.docs[0].id};
+if(data.status!=='approved' && data.status!=='Approved' && data.status!=='active'){ err.innerText='⏳ Application Pending hai. Admin ne abhi Approve nahi kiya.'; err.style.display='block'; document.getElementById('loginBtnMain').innerText='OTP Bhejo'; return; }
+skyOTP=Math.floor(100000+Math.random()*900000).toString(); skyPhone=phone;
+alert('✅ Verified Sky Seller!\n\nOTP: '+skyOTP+'\n(Test ke liye yahan dikh raha hai)');
+document.getElementById('otpBox').classList.remove('hidden');
+document.getElementById('loginBtnMain').innerText='OTP Dobara Bhejo';
+}catch(e){ err.innerText='❌ '+e.message; err.style.display='block'; document.getElementById('loginBtnMain').innerText='OTP Bhejo'; }
+}
+function skyVerifyOTP(){
+let otp=document.getElementById('loginOTP').value.trim();
+if(otp===skyOTP && otp!==""){
+sessionStorage.setItem('sky_sup_ok','yes'); sessionStorage.setItem('sky_sup_phone',skyPhone); sessionStorage.setItem('sky_sup_name',skyData?.name||skyData?.shop||skyPhone);
+document.getElementById('authBox').classList.add('hidden');
+document.getElementById('mainBox').classList.remove('hidden');
+document.getElementById('supNameShow').innerText = skyData?.name || skyData?.shop || 'Sky Seller';
+if(skyData?.shop) document.getElementById('shopNameInput').value = skyData.shop;
+if(skyData?.name) document.getElementById('ownerNameInput').value = skyData.name;
+if(skyData?.phoneDisplay) document.getElementById('waInput').value = skyData.phoneDisplay;
+if(skyData?.city) document.getElementById('cityInput').value = skyData.city;
+window.scrollTo(0,0);
+} else { alert('❌ Ghalat OTP'); }
+}
+function skyLogout(){ sessionStorage.removeItem('sky_sup_ok'); location.reload(); }
+function checkOtherCat(){ let v=document.getElementById('catSelect').value; document.getElementById('otherCat').style.display = (v==='Other') ? 'block':'none'; }
+function previewPic(inp){ if(inp.files && inp.files[0]){ let r=new FileReader(); r.onload=function(e){ let im=document.getElementById('picPreview'); im.src=e.target.result; im.style.display='block'; document.getElementById('picStatus').innerText='✅ Pic select ho gayi'; }; r.readAsDataURL(inp.files[0]); } }
+function calcSupplier(){
+let price = Number(document.
