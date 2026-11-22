@@ -215,3 +215,35 @@ function checkOtherCat(){ let v=document.getElementById('catSelect').value; docu
 function previewPic(inp){ if(inp.files && inp.files[0]){ let r=new FileReader(); r.onload=function(e){ let im=document.getElementById('picPreview'); im.src=e.target.result; im.style.display='block'; document.getElementById('picStatus').innerText='✅ Pic select ho gayi'; }; r.readAsDataURL(inp.files[0]); } }
 function calcSupplier(){
 let price = Number(document.
+getElementById('rateInput').value || 0);
+let box = document.getElementById('calcBox');
+if(!box) return;
+if(price <= 0){ box.innerHTML = "Rate likho, hisaab aa jayega..."; return; }
+let fee = Math.round(price * 0.15);
+if(fee < 100) fee = 100;
+let apkoMilega = price - fee;
+box.innerHTML = "💰 Tumhara Rate: <b>" + price + " Rs.</b><br>" +
+"🏦 SKY Fee (15%): <b>" + fee + " Rs.</b><br>" +
+"📦 Apko Milega: <b style='color:green'>" + apkoMilega + " Rs.</b>";
+}
+window.addEventListener('load', ()=>{
+if(sessionStorage.getItem('sky_sup_ok')==='yes'){
+document.getElementById('authBox').classList.add('hidden');
+document.getElementById('mainBox').classList.remove('hidden');
+document.getElementById('supNameShow').innerText = sessionStorage.getItem('sky_sup_name')||'Sky Seller';
+}
+let agree = document.getElementById('agreeAll');
+let btn = document.getElementById('submitBtn');
+if(agree && btn){
+let checkAll = ()=>{
+let all = document.querySelectorAll('.sop-check');
+let ok = agree.checked && [...all].every(c=>c.checked);
+btn.disabled = !ok;
+btn.innerText = ok ? '✅ Product Bhejo - Admin Ko' : '🔒 Pehle Upar Shartein Agree Karo';
+};
+agree.addEventListener('change', checkAll);
+document.querySelectorAll('.sop-check').forEach(c=>c.addEventListener('change', checkAll));
+}
+});
+</script>
+</body></html>
